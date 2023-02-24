@@ -1,46 +1,42 @@
 const uint8_t MOTOR_POLE_PAIRS = 15;
 const float MOTOR_PHASE_RESISTANCE = 0.5;
 const float MOTOR_MAX_TARGET = 8;
+const unsigned int MOTOR_VOLTAGE_LIMIT = 5;
+const unsigned int MOTOR_CURRENT_LIMIT = 5;
+const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 2;
 
-BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS, MOTOR_PHASE_RESISTANCE);
+BLDCMotor motor;
+
+unsigned long lastMotorRequestMillis = 0;
+
+void setMotorTarget(double percentage) {
+  motor.target = MOTOR_MAX_TARGET * percentage;
+  lastMotorRequestMillis = millis();
+}
 
 void motorSetup() {
-  debugLedSegment();
-
-  driver.pwm_frequency = 3000;
-  driver.voltage_power_supply = 12;
-  driver.voltage_limit = 5;
-  driver.init();
-
+  motor = BLDCMotor(MOTOR_POLE_PAIRS, MOTOR_PHASE_RESISTANCE);
+  
   motor.linkSensor(&sensor);
   motor.linkDriver(&driver);
 
   motor.target = 0;
-  motor.voltage_limit = 5;
-  motor.current_limit = 5;
-  motor.voltage_sensor_align = 2;
+  motor.voltage_limit = MOTOR_VOLTAGE_LIMIT;
+  motor.current_limit = MOTOR_CURRENT_LIMIT;
+  motor.voltage_sensor_align = MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT;
   motor.controller = MotionControlType::torque;
   motor.torque_controller = TorqueControlType::voltage;
   motor.foc_modulation = FOCModulationType::SinePWM;
-
-  debugLedSegment();
 
   motor.init();
   motor.initFOC();
 }
 
-unsigned long lastMotorRequestMillis = 0;
-
 void motorLoop() {
-  // Blinking LED to let user know that the motor is disabled.
-  // Micro-controller need to be restarted.
+  // If motor disabled, just update the sensor value
+  // to make the steering wheel still usable without force feedback.
   if (motor.enabled == false) {
-    bool ledState = true;
-    while (true) {
-      digitalWrite(LED_BUILTIN, ledState);
-      delay(200);
-      ledState = !ledState;
-    }
+    sensor.update();
     return;
   }
 
@@ -54,9 +50,4 @@ void motorLoop() {
   // Normal FOC routine.
   motor.loopFOC();
   motor.move();
-}
-
-void requestMotorTarget(double percentage) {
-  motor.target = MOTOR_MAX_TARGET * percentage;
-  lastMotorRequestMillis = millis();
 }
