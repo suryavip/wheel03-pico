@@ -1,4 +1,4 @@
-const uint8_t MOTOR_POLE_PAIRS = 15;
+const unsigned int MOTOR_POLE_PAIRS = 15;
 const float MOTOR_PHASE_RESISTANCE = 0.5;
 const float MOTOR_MAX_TARGET = 8;
 const unsigned int MOTOR_VOLTAGE_LIMIT = 5;
@@ -7,7 +7,7 @@ const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 2;
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS, MOTOR_PHASE_RESISTANCE);
 
-unsigned long lastMotorRequestMillis = 0;
+unsigned int lastMotorRequestMillis = 0;
 
 void setMotorTarget(double percentage) {
   motor.target = MOTOR_MAX_TARGET * percentage;

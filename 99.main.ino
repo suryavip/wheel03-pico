@@ -1,6 +1,7 @@
 bool setupDone = false;
 
 void setup() {
+  configSetup();
   comSetup();
   sensorSetup();
   driverSetup();

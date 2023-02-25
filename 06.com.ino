@@ -3,7 +3,43 @@ const unsigned int FFB_MAX_VALUE = 10000;
 String getCurrentPositionCommand() {
   String cmd = "E:";
   String delimiter = ";";
-  return cmd + getMultiRotationValue() + delimiter;
+  return cmd + getMultiRotationValueWithOffset() + delimiter;
+}
+
+void setAsZeroOffset() {
+  setZeroOffset(getMultiRotationValue());
+}
+
+void setForceFeedback(String value) {
+  double readDouble = value.toDouble();
+  double percentage = readDouble / FFB_MAX_VALUE;
+  setMotorTarget(percentage);
+  Serial.print(getCurrentPositionCommand());
+}
+
+void parser(String & cmdRef, String & valRef) {
+  String cmd = "";
+  String val = "";
+
+  // skip if < 3. Need min. 3 for 1 command: 1 cmd char, 1 colon, 1 semi-colon.
+  while (Serial.available() < 3) return;
+
+  char read = Serial.read();
+  while (read != ':') {
+    cmd += read;
+    if (Serial.available() < 1) return;
+    read = Serial.read();
+  }
+
+  read = Serial.read();
+  while (read != ';') {
+    val += read;
+    if (Serial.available() < 1) return;
+    read = Serial.read();
+  }
+
+  cmdRef = cmd;
+  valRef = val;
 }
 
 void comSetup() {
@@ -12,22 +48,10 @@ void comSetup() {
 }
 
 void comLoop() {
-  if (Serial.available() < 4) return;
+  String cmd = "";
+  String val = "";
+  parser(cmd, val);
 
-  bool detectSetZeroOffsetCmd = Serial.findUntil("C:", ";");
-  if (detectSetZeroOffsetCmd) {
-    setZeroOffset(currentRawAngle);
-  }
-
-  bool detectFfbCmd = Serial.findUntil("F:", ";");
-  if (detectFfbCmd) {
-    // Calculating requested FFB percentage.
-    String ffbValue = Serial.readString();
-    ffbValue.replace(";", "");
-    double readDouble = ffbValue.toDouble();
-    double percentage = readDouble / FFB_MAX_VALUE;
-    setMotorTarget(percentage);
-
-    Serial.print(getCurrentPositionCommand());
-  }
+  if (cmd == "F") setForceFeedback(val);
+  if (cmd == "C") setAsZeroOffset();
 }
