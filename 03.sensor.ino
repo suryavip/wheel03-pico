@@ -10,7 +10,7 @@ int currentRawAngle = -1;
 int overRotation = 0;
 
 int getMultiRotationValue() {
-  return (SENSOR_PPR * overRotation) + currentRawAngle;
+  return (SENSOR_PPR * overRotation) + currentRawAngle + zeroOffset;
 }
 
 float readMySensorCallback() {
