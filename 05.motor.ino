@@ -5,7 +5,7 @@ const unsigned int MOTOR_VOLTAGE_LIMIT = 5;
 const unsigned int MOTOR_CURRENT_LIMIT = 5;
 const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 2;
 
-BLDCMotor motor;
+BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS, MOTOR_PHASE_RESISTANCE);
 
 unsigned long lastMotorRequestMillis = 0;
 
@@ -15,8 +15,6 @@ void setMotorTarget(double percentage) {
 }
 
 void motorSetup() {
-  motor = BLDCMotor(MOTOR_POLE_PAIRS, MOTOR_PHASE_RESISTANCE);
-  
   motor.linkSensor(&sensor);
   motor.linkDriver(&driver);
 

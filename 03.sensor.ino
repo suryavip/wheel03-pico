@@ -1,7 +1,7 @@
 const unsigned int SENSOR_PPR = 4096;
 const unsigned int SENSOR_MID_PPR = SENSOR_PPR / 2;
 const unsigned int SENSOR_MID_PPR_MIN_1 = SENSOR_MID_PPR - 1;
-const unsigned int SENSOR_I2C_CLOCK = 400 * 1000;
+const unsigned int SENSOR_I2C_CLOCK = 1000 * 1000;
 
 AS5600 as5600;
 GenericSensor sensor;

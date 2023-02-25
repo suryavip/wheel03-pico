@@ -1,19 +1,14 @@
 bool setupDone = false;
 
 void setup() {
-  debugLedStart();
-
   comSetup();
   sensorSetup();
-//  motorSetup();
-
-  debugLedStop();
-
+  driverSetup();
+  motorSetup();
   setupDone = true;
 }
 
 void loop() {
-  sensor.update();
   comLoop();
 }
 
