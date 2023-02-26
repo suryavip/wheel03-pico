@@ -1,16 +1,21 @@
 const unsigned int MOTOR_POLE_PAIRS = 15;
-const float MOTOR_PHASE_RESISTANCE = 0.5;
-const float MOTOR_MAX_TARGET = 8;
-const unsigned int MOTOR_VOLTAGE_LIMIT = 5;
-const unsigned int MOTOR_CURRENT_LIMIT = 5;
+const unsigned int MOTOR_VOLTAGE_LIMIT = 6;
 const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 2;
 
-BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS, MOTOR_PHASE_RESISTANCE);
+int ffbMapSize = 5;
+float ffbMapIn[]  = { -10000, -5000, - 100, -10, 0, 10, 100, 5000, 10000};
+float ffbMapOut[] = {     -3,  -1.2,   -.3, -.1, 0, .1,  .3,  1.2,     3};
+
+BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 
 unsigned int lastMotorRequestMillis = 0;
 
-void setMotorTarget(double percentage) {
-  motor.target = MOTOR_MAX_TARGET * percentage;
+void setMotorTarget(int magnitude) {
+  float mapped = multiMap<float>(magnitude,
+                                 ffbMapIn,
+                                 ffbMapOut,
+                                 ffbMapSize);
+  motor.target = mapped;
   lastMotorRequestMillis = millis();
 }
 
@@ -20,7 +25,6 @@ void motorSetup() {
 
   motor.target = 0;
   motor.voltage_limit = MOTOR_VOLTAGE_LIMIT;
-  motor.current_limit = MOTOR_CURRENT_LIMIT;
   motor.voltage_sensor_align = MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT;
   motor.controller = MotionControlType::torque;
   motor.torque_controller = TorqueControlType::voltage;

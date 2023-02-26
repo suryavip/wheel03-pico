@@ -1,5 +1,3 @@
-const unsigned int FFB_MAX_VALUE = 10000;
-
 String getCurrentPositionCommand() {
   String cmd = "E:";
   String delimiter = ";";
@@ -11,9 +9,8 @@ void setAsZeroOffset() {
 }
 
 void setForceFeedback(String value) {
-  double readDouble = value.toDouble();
-  double percentage = readDouble / FFB_MAX_VALUE;
-  setMotorTarget(percentage);
+  int magnitude = value.toInt();
+  setMotorTarget(magnitude);
   Serial.print(getCurrentPositionCommand());
 }
 
