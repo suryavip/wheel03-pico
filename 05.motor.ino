@@ -26,6 +26,7 @@ void motorSetup() {
   motor.target = 0;
   motor.voltage_limit = MOTOR_VOLTAGE_LIMIT;
   motor.voltage_sensor_align = MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT;
+  motor.velocity_limit = 40;
   motor.controller = MotionControlType::torque;
   motor.torque_controller = TorqueControlType::voltage;
   motor.foc_modulation = FOCModulationType::SinePWM;
