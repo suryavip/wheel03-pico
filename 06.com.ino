@@ -4,16 +4,6 @@ String getCurrentPositionCommand() {
   return cmd + getMultiRotationValueWithOffset() + delimiter;
 }
 
-void setAsZeroOffset() {
-  setZeroOffset(getMultiRotationValue());
-}
-
-void setForceFeedback(String value) {
-  int magnitude = value.toInt();
-  setMotorTarget(magnitude);
-  Serial.print(getCurrentPositionCommand());
-}
-
 void parser(String & cmdRef, String & valRef) {
   String cmd = "";
   String val = "";
@@ -49,6 +39,17 @@ void comLoop() {
   String val = "";
   parser(cmd, val);
 
-  if (cmd == "F") setForceFeedback(val);
-  if (cmd == "C") setAsZeroOffset();
+  if (cmd == "F") {
+    int magnitude = val.toInt();
+    setMotorTarget(magnitude);
+    Serial.print(getCurrentPositionCommand());
+  }
+
+  if (cmd == "C") {
+    setSavedZeroOffset(getMultiRotationValue());
+  }
+
+  if (cmd == "P") {
+    setSavedMaxPower(val.toFloat());
+  }
 }

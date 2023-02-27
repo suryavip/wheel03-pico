@@ -14,7 +14,7 @@ int getMultiRotationValue() {
 }
 
 int getMultiRotationValueWithOffset() {
-  return getMultiRotationValue() - zeroOffset;
+  return getMultiRotationValue() - savedZeroOffset;
 }
 
 float readMySensorCallback() {

@@ -1,20 +1,29 @@
 const unsigned int MOTOR_POLE_PAIRS = 15;
 const unsigned int MOTOR_VOLTAGE_LIMIT = 6;
 const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 2;
-
-int ffbMapSize = 9;
-float ffbMapIn[]  = { -10000, -5000, - 100, -10, 0, 10, 100, 5000, 10000};
-float ffbMapOut[] = {     -3,  -1.2,   -.3, -.1, 0, .1,  .3,  1.2,     3};
+const float MOTOR_MIN_MOVING_VOLTAGE = .5;
+const float minPositive = MOTOR_MIN_MOVING_VOLTAGE;
+const float minNegative = minPositive * -1;
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 
 unsigned int lastMotorRequestMillis = 0;
 
 void setMotorTarget(int magnitude) {
+  float maxPositive = MOTOR_VOLTAGE_LIMIT * savedMaxPower;
+  float maxNegative = maxPositive * -1;
+
+  int ffbMapSize = 5;
+  float ffbMapIn[]  = {     -10000,         -10, 0,          10,       10000};
+  float ffbMapOut[] = {maxNegative, minNegative, 0, minPositive, maxPositive};
+
   float mapped = multiMap<float>(magnitude,
                                  ffbMapIn,
                                  ffbMapOut,
                                  ffbMapSize);
+
+  if (isDebug) Serial.println(mapped);
+
   motor.target = mapped;
   lastMotorRequestMillis = millis();
 }
