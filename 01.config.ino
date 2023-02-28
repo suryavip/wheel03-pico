@@ -13,6 +13,9 @@ void setSavedZeroOffset(int newZeroOffset) {
 }
 
 void setSavedMaxPower(float newMaxPower) {
+  if (newMaxPower > 1) newMaxPower = 1;
+  if (newMaxPower < 0) newMaxPower = 0;
+  
   savedMaxPower = newMaxPower;
   String content = String(savedMaxPower, 2);
   writeToFile(CONFIG_PATH_MAX_POWER, content);
