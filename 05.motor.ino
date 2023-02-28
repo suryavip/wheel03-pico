@@ -8,6 +8,9 @@ BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 unsigned int lastMotorRequestMillis = 0;
 
 void setMotorTarget(int magnitude) {
+  if (magnitude > 10000) magnitude = 10000;
+  if (magnitude < -10000) magnitude = -10000;
+  
   float full = MOTOR_VOLTAGE_LIMIT * savedMaxPower;
   float quarter = full * .25;
   
