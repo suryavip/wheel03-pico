@@ -49,7 +49,7 @@ void comLoop() {
   if (cmd == "F") {
     int magnitude = val.toInt();
     setMotorTarget(magnitude);
-    Serial.print(getCurrentPositionCommand());
+    Serial.print(getCurrentPositionsCommand());
   }
 
   if (cmd == "C") {
