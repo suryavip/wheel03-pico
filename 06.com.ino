@@ -1,7 +1,14 @@
-String getCurrentPositionCommand() {
+String getCurrentPositionsCommand() {
   String cmd = "E:";
+  String separator = ",";
   String delimiter = ";";
-  return cmd + getMultiRotationValueWithOffset() + delimiter;
+
+  String output = cmd + getMultiRotationValueWithOffset();
+  output += separator + accelerator_pedal;
+  output += separator + brake_pedal;
+  output += separator + clutch_pedal;
+
+  return output + delimiter;
 }
 
 void parser(String & cmdRef, String & valRef) {
