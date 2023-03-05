@@ -10,12 +10,10 @@ unsigned int lastMotorRequestMillis = 0;
 void setMotorTarget(int magnitude) {
   if (magnitude > 10000) magnitude = 10000;
   if (magnitude < -10000) magnitude = -10000;
-  
-  float full = MOTOR_VOLTAGE_LIMIT * savedMaxPower;
-  float quarter = full * .25;
-  
+
+  float quarter = MOTOR_VOLTAGE_LIMIT * .25;
   float ffbMapIn[]  = {0, 100, 2500, 10000};
-  float ffbMapOut[] = {0, MOTOR_MIN_ROTATING_VOLTAGE, quarter, full};
+  float ffbMapOut[] = {0, MOTOR_MIN_ROTATING_VOLTAGE, quarter, MOTOR_VOLTAGE_LIMIT};
   float mapped = multiMap<float>(abs(magnitude), ffbMapIn, ffbMapOut, 4);
 
   // Apply back direction.

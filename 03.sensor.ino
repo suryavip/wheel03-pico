@@ -13,10 +13,6 @@ int getMultiRotationValue() {
   return (SENSOR_PPR * overRotation) + currentRawAngle;
 }
 
-int getMultiRotationValueWithOffset() {
-  return getMultiRotationValue() - savedZeroOffset;
-}
-
 float readMySensorCallback() {
   int newPosition = as5600.rawAngle();
 

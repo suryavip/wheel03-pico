@@ -19,14 +19,16 @@ void pedalsLoop() {
   brake_pedal = brkFilter.getFilteredValue(brk);
   clutch_pedal = cltFilter.getFilteredValue(clt);
 
-  //  Serial.print("Min:");
-  //  Serial.print(0);
-  //  Serial.print(",A:");
-  //  Serial.print(acc);
-  //  Serial.print(",B:");
-  //  Serial.print(brk);
-  //  Serial.print(",C:");
-  //  Serial.print(clt);
-  //  Serial.print(",Max:");
-  //  Serial.println(4095);
+  if (isDebug) {
+    Serial.print("Min:");
+    Serial.print(0);
+    Serial.print(",A:");
+    Serial.print(acc);
+    Serial.print(",B:");
+    Serial.print(brk);
+    Serial.print(",C:");
+    Serial.print(clt);
+    Serial.print(",Max:");
+    Serial.println(4095);
+  }
 }

@@ -3,7 +3,7 @@ String getCurrentPositionsCommand() {
   String separator = ",";
   String delimiter = ";";
 
-  String output = cmd + getMultiRotationValueWithOffset();
+  String output = cmd + getMultiRotationValue();
   output += separator + accelerator_pedal;
   output += separator + brake_pedal;
   output += separator + clutch_pedal;
@@ -50,13 +50,5 @@ void comLoop() {
     int magnitude = val.toInt();
     setMotorTarget(magnitude);
     Serial.print(getCurrentPositionsCommand());
-  }
-
-  if (cmd == "C") {
-    setSavedZeroOffset(getMultiRotationValue());
-  }
-
-  if (cmd == "P") {
-    setSavedMaxPower(val.toFloat());
   }
 }
