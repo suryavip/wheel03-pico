@@ -1,5 +1,5 @@
 const unsigned int MOTOR_POLE_PAIRS = 15;
-const unsigned int MOTOR_VOLTAGE_LIMIT = 3;
+const unsigned int MOTOR_VOLTAGE_LIMIT = 6;
 const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 2;
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
@@ -10,10 +10,9 @@ void setMotorTarget(int magnitude) {
   if (magnitude > 10000) magnitude = 10000;
   if (magnitude < -10000) magnitude = -10000;
 
-  float quarter = MOTOR_VOLTAGE_LIMIT * .25;
-  float ffbMapIn[]  = {0, 100, 1000, 10000};
-  float ffbMapOut[] = {0, .12, .3, 3};
-  float mapped = multiMap<float>(abs(magnitude), ffbMapIn, ffbMapOut, 4);
+  float ffbMapIn[]  = {0, 100, 2500, 5000, 7500, 10000};
+  float ffbMapOut[] = {0, 0.12, 0.37, 0.75, 1.50, 3.00};
+  float mapped = multiMap<float>(abs(magnitude), ffbMapIn, ffbMapOut, 6);
 
   // Apply back direction.
   if (magnitude < 0) mapped *= -1;
@@ -33,7 +32,7 @@ void motorSetup() {
   motor.velocity_limit = 40;
   motor.controller = MotionControlType::torque;
   motor.torque_controller = TorqueControlType::voltage;
-  motor.foc_modulation = FOCModulationType::SinePWM;
+  motor.foc_modulation = FOCModulationType::SpaceVectorPWM;
 
   motor.init();
   motor.initFOC();
