@@ -24,10 +24,16 @@ void pedalsLoop() {
     Serial.print(0);
     Serial.print(",A:");
     Serial.print(acc);
+    Serial.print(",AF:");
+    Serial.print(accelerator_pedal);
     Serial.print(",B:");
     Serial.print(brk);
+    Serial.print(",BF:");
+    Serial.print(brake_pedal);
     Serial.print(",C:");
     Serial.print(clt);
+    Serial.print(",CF:");
+    Serial.print(clutch_pedal);
     Serial.print(",Max:");
     Serial.println(4095);
   }
