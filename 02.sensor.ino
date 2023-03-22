@@ -9,10 +9,6 @@ GenericSensor sensor;
 int currentRawAngle = -1;
 int overRotation = 0;
 
-int getMultiRotationValue() {
-  return (SENSOR_PPR * overRotation) + currentRawAngle;
-}
-
 float readMySensorCallback() {
   int newPosition = as5600.rawAngle();
 

@@ -1,14 +1,16 @@
-String getCurrentPositionsCommand() {
+void replyWithPositions() {
   String cmd = "E:";
   String separator = ",";
   String delimiter = ";";
 
-  String output = cmd + getMultiRotationValue();
+  String output = cmd + currentRawAngle;
+  output += separator + overRotation;
   output += separator + accValue;
   output += separator + brkValue;
   output += separator + cltValue;
 
-  return output + delimiter;
+  output += delimiter;
+  Serial.print(output);
 }
 
 void parser(String & cmdRef, String & valRef) {
@@ -47,8 +49,8 @@ void comLoop() {
   parser(cmd, val);
 
   if (cmd == "F") {
+    replyWithPositions();
     int magnitude = val.toInt();
     setMotorTarget(magnitude);
-    Serial.print(getCurrentPositionsCommand());
   }
 }
