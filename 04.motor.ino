@@ -7,12 +7,13 @@ BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 unsigned int lastMotorRequestMillis = 0;
 
 void setMotorTarget(int magnitude) {
-  if (magnitude > 10000) magnitude = 10000;
-  if (magnitude < -10000) magnitude = -10000;
+  int absMagnitude = abs(magnitude);
+
+  if (absMagnitude > 10000) absMagnitude = 10000;
 
   float ffbMapIn[]  = {0, 100, 2500, 5000, 7500, 10000};
-  float ffbMapOut[] = {0, 0.12, 0.37, 0.75, 1.50, 3.00};
-  float mapped = multiMap<float>(abs(magnitude), ffbMapIn, ffbMapOut, 6);
+  float ffbMapOut[] = {0, 0.12, 0.50, 1.00, 2.00, 4.00};
+  float mapped = multiMap<float>(absMagnitude, ffbMapIn, ffbMapOut, 6);
 
   // Apply back direction.
   if (magnitude < 0) mapped *= -1;
