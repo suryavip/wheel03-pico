@@ -47,9 +47,9 @@ void motorLoop() {
   }
 
   // Safety:
-  // Stop the motor if not receive any request after 100ms
+  // Stop the motor if not receive any request after 500ms
   // since last command.
-  if (millis() - lastMotorRequestMillis > 100) {
+  if (millis() - lastMotorRequestMillis > 500) {
     motor.target = 0;
   }
 
