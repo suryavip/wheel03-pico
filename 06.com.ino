@@ -4,9 +4,9 @@ String getCurrentPositionsCommand() {
   String delimiter = ";";
 
   String output = cmd + getMultiRotationValue();
-  output += separator + accelerator_pedal;
-  output += separator + brake_pedal;
-  output += separator + clutch_pedal;
+  output += separator + accValue;
+  output += separator + brkValue;
+  output += separator + cltValue;
 
   return output + delimiter;
 }

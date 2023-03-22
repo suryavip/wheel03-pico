@@ -2,9 +2,9 @@ Kalman accFilter(0.125, 32, 1023, 0);
 Kalman brkFilter(0.125, 32, 1023, 0);
 Kalman cltFilter(0.125, 32, 1023, 0);
 
-int accelerator_pedal = 0;
-int brake_pedal = 0;
-int clutch_pedal = 0;
+int accValue = 0;
+int brkValue = 0;
+int cltValue = 0;
 
 void pedalsSetup() {
   analogReadResolution(12);
@@ -15,9 +15,9 @@ void pedalsLoop() {
   int brk = analogRead(PIN_BRAKE);
   int clt = analogRead(PIN_CLUTCH);
 
-  accelerator_pedal = accFilter.getFilteredValue(acc);
-  brake_pedal = brkFilter.getFilteredValue(brk);
-  clutch_pedal = cltFilter.getFilteredValue(clt);
+  accValue = accFilter.getFilteredValue(acc);
+  brkValue = brkFilter.getFilteredValue(brk);
+  cltValue = cltFilter.getFilteredValue(clt);
 
   if (isDebug) {
     Serial.print("Min:");
@@ -25,15 +25,15 @@ void pedalsLoop() {
     Serial.print(",A:");
     Serial.print(acc);
     Serial.print(",AF:");
-    Serial.print(accelerator_pedal);
+    Serial.print(accValue);
     Serial.print(",B:");
     Serial.print(brk);
     Serial.print(",BF:");
-    Serial.print(brake_pedal);
+    Serial.print(brkValue);
     Serial.print(",C:");
     Serial.print(clt);
     Serial.print(",CF:");
-    Serial.print(clutch_pedal);
+    Serial.print(cltValue);
     Serial.print(",Max:");
     Serial.println(4095);
   }
