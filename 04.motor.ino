@@ -11,9 +11,9 @@ void setMotorTarget(int magnitude) {
 
   if (absMagnitude > 10000) absMagnitude = 10000;
 
-  float ffbMapIn[]  = {0, 100, 2500, 5000, 7500, 10000};
-  float ffbMapOut[] = {0, 0.12, 0.50, 1.00, 2.00, 4.00};
-  float mapped = multiMap<float>(absMagnitude, ffbMapIn, ffbMapOut, 6);
+  float ffbMapIn[]  = {0, 10, 100, 1000, 10000};
+  float ffbMapOut[] = {0, .1, .3, .6, 6};
+  float mapped = multiMap<float>(absMagnitude, ffbMapIn, ffbMapOut, 5);
 
   // Apply back direction.
   if (magnitude < 0) mapped *= -1;
