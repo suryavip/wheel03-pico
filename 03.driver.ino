@@ -1,4 +1,4 @@
-const unsigned int DRIVER_PWM_FREQ = 3000;
+const unsigned int DRIVER_PWM_FREQ = 15000;
 const unsigned int DRIVER_VOLTAGE_SUPPLY = 24;
 const unsigned int DRIVER_VOLTAGE_LIMIT = 24;
 

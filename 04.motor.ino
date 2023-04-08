@@ -11,9 +11,9 @@ void setMotorTarget(int magnitude) {
 
   if (absMagnitude > 10000) absMagnitude = 10000;
 
-  float ffbMapIn[]  = {0, 10, 100, 1000, 10000};
-  float ffbMapOut[] = {0, .1, .3, .6, 6};
-  float mapped = multiMap<float>(absMagnitude, ffbMapIn, ffbMapOut, 5);
+  float ffbMapIn[]  = {0, 50, 10000};
+  float ffbMapOut[] = {0, 1, 6};
+  float mapped = multiMap<float>(absMagnitude, ffbMapIn, ffbMapOut, 3);
 
   // Apply back direction.
   if (magnitude < 0) mapped *= -1;
@@ -30,7 +30,7 @@ void motorSetup() {
   motor.target = 0;
   motor.voltage_limit = MOTOR_VOLTAGE_LIMIT;
   motor.voltage_sensor_align = MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT;
-  motor.velocity_limit = 40;
+  motor.velocity_limit = 60;
   motor.controller = MotionControlType::torque;
   motor.torque_controller = TorqueControlType::voltage;
   motor.foc_modulation = FOCModulationType::SpaceVectorPWM;
