@@ -1,6 +1,6 @@
 const unsigned int MOTOR_POLE_PAIRS = 15;
 const unsigned int MOTOR_VOLTAGE_LIMIT = 6;
-const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 2;
+const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 3;
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 
@@ -11,8 +11,8 @@ void setMotorTarget(int magnitude) {
 
   if (absMagnitude > 10000) absMagnitude = 10000;
 
-  float ffbMapIn[]  = {0, 50, 10000};
-  float ffbMapOut[] = {0, 1, 6};
+  float ffbMapIn[]  = {0, 1, 10000};
+  float ffbMapOut[] = {0, 1, 7};
   float mapped = multiMap<float>(absMagnitude, ffbMapIn, ffbMapOut, 3);
 
   // Apply back direction.
