@@ -1,25 +1,30 @@
 const unsigned int MOTOR_POLE_PAIRS = 15;
-const unsigned int MOTOR_VOLTAGE_LIMIT = 6;
+const unsigned int MOTOR_VOLTAGE_LIMIT = 7;
 const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 3;
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 
 unsigned int lastMotorRequestMillis = 0;
+float lastMotorTarget = 0;
 
 void setMotorTarget(int magnitude) {
   int absMagnitude = abs(magnitude);
 
   if (absMagnitude > 10000) absMagnitude = 10000;
 
-  float ffbMapIn[]  = {0, 1, 10000};
-  float ffbMapOut[] = {0, 1, 7};
-  float mapped = multiMap<float>(absMagnitude, ffbMapIn, ffbMapOut, 3);
+  float mapMagnitudeIn[] = {0, 3000, 10000};
+  float mapTargetOut[] = {0, 3.5, 7};
+  float mappedTarget = multiMap<float>(
+                         absMagnitude,
+                         mapMagnitudeIn,
+                         mapTargetOut,
+                         3);
 
   // Apply back direction.
-  if (magnitude < 0) mapped *= -1;
+  if (magnitude < 0) mappedTarget *= -1;
 
-  if (isDebug) Serial.println(mapped);
-  motor.target = mapped;
+  if (isDebug) Serial.println(mappedTarget);
+  lastMotorTarget = mappedTarget;
   lastMotorRequestMillis = millis();
 }
 
@@ -47,14 +52,30 @@ void motorLoop() {
     return;
   }
 
+  float finalTarget = lastMotorTarget + 0;
+
+  // Add damper
+  float velo = sensor.getVelocity();
+  float mapAbsVeloIn[] = {0, 2, 5};
+  float mapTargetAdderOut[] = {0, 0, 1};
+  float mappedTargetAdder = multiMap<float>(
+                              abs(velo),
+                              mapAbsVeloIn,
+                              mapTargetAdderOut,
+                              3);
+  if (mappedTargetAdder > 1) mappedTargetAdder = 1;
+  if (velo < 0) finalTarget += mappedTargetAdder;
+  else finalTarget -= mappedTargetAdder;
+
   // Safety:
   // Stop the motor if not receive any request after 500ms
   // since last command.
   if (millis() - lastMotorRequestMillis > 500) {
-    motor.target = 0;
+    finalTarget = 0;
   }
 
   // Normal FOC routine.
+  motor.target = finalTarget;
   motor.loopFOC();
   motor.move();
 }
