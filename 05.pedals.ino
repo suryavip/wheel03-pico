@@ -19,7 +19,7 @@ void pedalsLoop() {
   brkValue = brkFilter.getFilteredValue(brk);
   cltValue = cltFilter.getFilteredValue(clt);
 
-  if (isDebug) {
+  if (isPedalsDebug) {
     Serial.print("Min:");
     Serial.print(0);
     Serial.print(",A:");

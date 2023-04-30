@@ -23,7 +23,7 @@ void setMotorTarget(int magnitude) {
   // Apply back direction.
   if (magnitude < 0) mappedTarget *= -1;
 
-  if (isDebug) Serial.println(mappedTarget);
+  if (isMotorDebug) Serial.println(mappedTarget);
   lastMotorTarget = mappedTarget;
   lastMotorRequestMillis = millis();
 }

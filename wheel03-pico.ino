@@ -3,4 +3,5 @@
 #include <MultiMap.h>
 #include <Kalman.h>
 
-#define isDebug false
+#define isMotorDebug false
+#define isPedalsDebug false
