@@ -36,11 +36,10 @@ float calculateDamperAdder() {
 
   if (isDamperDebug) {
     Serial.print("Velo:");
-    Serial.print(filteredVelo);
-    Serial.println(4095);
+    Serial.println(filteredVelo);
   }
 
-  float mapAbsVeloIn[] = {0, 0.1, 2};
+  float mapAbsVeloIn[] = {0, 0.1, 1};
   float mapTargetAdderOut[] = {0, 0, 1};
   float mappedTargetAdder = multiMap<float>(
                               absVelo,
