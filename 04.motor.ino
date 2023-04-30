@@ -3,6 +3,7 @@ const unsigned int MOTOR_VOLTAGE_LIMIT = 7;
 const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 3;
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
+Kalman veloFilter(0.01, 32, 1023, 0);
 
 unsigned int lastMotorRequestMillis = 0;
 float lastMotorTarget = 0;
@@ -26,6 +27,30 @@ void setMotorTarget(int magnitude) {
   if (isMotorDebug) Serial.println(mappedTarget);
   lastMotorTarget = mappedTarget;
   lastMotorRequestMillis = millis();
+}
+
+float calculateDamperAdder() {
+  float velo = sensor.getVelocity();
+  float filteredVelo = veloFilter.getFilteredValue(velo);
+  float absVelo = abs(filteredVelo);
+
+  if (isDamperDebug) {
+    Serial.print("Velo:");
+    Serial.print(filteredVelo);
+    Serial.println(4095);
+  }
+
+  float mapAbsVeloIn[] = {0, 0.1, 2};
+  float mapTargetAdderOut[] = {0, 0, 1};
+  float mappedTargetAdder = multiMap<float>(
+                              absVelo,
+                              mapAbsVeloIn,
+                              mapTargetAdderOut,
+                              3);
+  if (mappedTargetAdder > 1) mappedTargetAdder = 1;
+
+  if (filteredVelo < 0) return mappedTargetAdder;
+  else return mappedTargetAdder * -1;
 }
 
 void motorSetup() {
@@ -55,17 +80,7 @@ void motorLoop() {
   float finalTarget = lastMotorTarget + 0;
 
   // Add damper
-  float velo = sensor.getVelocity();
-  float mapAbsVeloIn[] = {0, 2, 5};
-  float mapTargetAdderOut[] = {0, 0, 1};
-  float mappedTargetAdder = multiMap<float>(
-                              abs(velo),
-                              mapAbsVeloIn,
-                              mapTargetAdderOut,
-                              3);
-  if (mappedTargetAdder > 1) mappedTargetAdder = 1;
-  if (velo < 0) finalTarget += mappedTargetAdder;
-  else finalTarget -= mappedTargetAdder;
+  finalTarget += calculateDamperAdder();
 
   // Safety:
   // Stop the motor if not receive any request after 500ms
