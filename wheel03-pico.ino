@@ -4,5 +4,4 @@
 #include <Kalman.h>
 
 #define isMotorDebug false
-#define isDamperDebug false
 #define isPedalsDebug false
