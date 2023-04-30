@@ -1,6 +1,6 @@
-Kalman accFilter(0.125, 32, 1023, 0);
-Kalman brkFilter(0.125, 32, 1023, 0);
-Kalman cltFilter(0.125, 32, 1023, 0);
+Kalman accFilter(0.1, 32, 4095, 0);
+Kalman brkFilter(0.1, 32, 4095, 0);
+Kalman cltFilter(0.1, 32, 4095, 0);
 
 int accValue = 0;
 int brkValue = 0;
