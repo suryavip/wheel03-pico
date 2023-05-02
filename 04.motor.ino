@@ -7,6 +7,7 @@ Kalman veloFilter(0.01, 32, 1023, 0);
 
 unsigned int lastMotorRequestMillis = 0;
 float lastMotorTarget = 0;
+float lastNoFreewheel = 0;
 
 void setMotorTarget(int magnitude) {
   int absMagnitude = abs(magnitude);
@@ -29,27 +30,20 @@ void setMotorTarget(int magnitude) {
   lastMotorRequestMillis = millis();
 }
 
-float calculateFreewheelAssist() {
+float noFreewheel() {
   float velo = sensor.getVelocity();
   float filteredVelo = veloFilter.getFilteredValue(velo);
-  float absVelo = abs(filteredVelo);
 
-  float mapAbsVeloIn[] = {0, 0.2, 1};
-  float mapTargetOut[] = {0, 0, 1};
-  float mappedTarget = multiMap<float>(
-                         absVelo,
-                         mapAbsVeloIn,
-                         mapTargetOut,
-                         3);
-  if (mappedTarget > .5) mappedTarget = .5;
+  if (lastMotorTarget != 0) return 0;
 
-  if (filteredVelo < 0) mappedTarget *= -1;
+  float modTarget = .5;
 
-  float motorTargetPercentage = (abs(lastMotorTarget) / 1);
-  if (motorTargetPercentage > 1) motorTargetPercentage = 1;
-  mappedTarget *= 1 - motorTargetPercentage;
+  if (filteredVelo > .2) modTarget *= 1;
+  else if (filteredVelo < -.2) modTarget *= -1;
+  else modTarget = lastNoFreewheel;
 
-  return mappedTarget;
+  lastNoFreewheel = modTarget;
+  return modTarget;
 }
 
 void motorSetup() {
@@ -84,7 +78,7 @@ void motorLoop() {
   }
 
   // Normal FOC routine.
-  motor.target = lastMotorTarget + calculateFreewheelAssist();
+  motor.target = lastMotorTarget + noFreewheel();
   motor.loopFOC();
   motor.move();
 }
