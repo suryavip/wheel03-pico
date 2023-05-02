@@ -1,7 +1,6 @@
 const unsigned int MOTOR_POLE_PAIRS = 15;
 const unsigned int MOTOR_VOLTAGE_LIMIT = 7;
 const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 3;
-const float MOTOR_FREEWHEEL_ASSIST_TARGET = .5;
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 Kalman veloFilter(0.01, 32, 1023, 0);
@@ -31,23 +30,25 @@ void setMotorTarget(int magnitude) {
 }
 
 float calculateFreewheelAssist() {
-  if (lastMotorTarget > MOTOR_FREEWHEEL_ASSIST_TARGET) return 0;
-  if (lastMotorTarget < MOTOR_FREEWHEEL_ASSIST_TARGET * -1) return 0;
-  
   float velo = sensor.getVelocity();
   float filteredVelo = veloFilter.getFilteredValue(velo);
   float absVelo = abs(filteredVelo);
 
-  float mapAbsVeloIn[] = {0, 0.1, 1};
+  float mapAbsVeloIn[] = {0, 0.2, 1};
   float mapTargetOut[] = {0, 0, 1};
   float mappedTarget = multiMap<float>(
                          absVelo,
                          mapAbsVeloIn,
                          mapTargetOut,
                          3);
-  if (mappedTarget > MOTOR_FREEWHEEL_ASSIST_TARGET) mappedTarget = MOTOR_FREEWHEEL_ASSIST_TARGET;
+  if (mappedTarget > .5) mappedTarget = .5;
 
   if (filteredVelo < 0) mappedTarget *= -1;
+
+  float motorTargetPercentage = (abs(lastMotorTarget) / 1);
+  if (motorTargetPercentage > 1) motorTargetPercentage = 1;
+  mappedTarget *= 1 - motorTargetPercentage;
+
   return mappedTarget;
 }
 
