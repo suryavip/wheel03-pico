@@ -6,16 +6,35 @@ BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 Kalman veloFilter(0.01, 32, 1023, 0);
 
 unsigned int lastMotorRequestMillis = 0;
-float lastMotorTarget = 0;
-float lastNoFreewheel = 0;
+int lastMotorRequestMagnitude = 0;
+int lastVeloReactiveMagnitude = 0;
 
-void setMotorTarget(int magnitude) {
+void setRequestMagnitude(int magnitude) {
+  lastMotorRequestMagnitude = magnitude;
+  lastMotorRequestMillis = millis();
+}
+
+int veloReactiveMagnitude() {
+  float velo = sensor.getVelocity();
+  float filteredVelo = veloFilter.getFilteredValue(velo);
+
+  int magnitude = 100;
+
+  if (filteredVelo > .2) magnitude *= 1;
+  else if (filteredVelo < -.2) magnitude *= -1;
+  else magnitude = lastVeloReactiveMagnitude;
+
+  lastVeloReactiveMagnitude = magnitude;
+  return magnitude;
+}
+
+float magnitudeToTarget(int magnitude) {
   int absMagnitude = abs(magnitude);
 
   if (absMagnitude > 10000) absMagnitude = 10000;
 
   float mapMagnitudeIn[] = {0, 1, 10000};
-  float mapTargetOut[] = {0, .7, 7};
+  float mapTargetOut[] = {0, 1, 7};
   float mappedTarget = multiMap<float>(
                          absMagnitude,
                          mapMagnitudeIn,
@@ -26,24 +45,7 @@ void setMotorTarget(int magnitude) {
   if (magnitude < 0) mappedTarget *= -1;
 
   if (isMotorDebug) Serial.println(mappedTarget);
-  lastMotorTarget = mappedTarget;
-  lastMotorRequestMillis = millis();
-}
-
-float noFreewheel() {
-  float velo = sensor.getVelocity();
-  float filteredVelo = veloFilter.getFilteredValue(velo);
-
-  if (lastMotorTarget != 0) return 0;
-
-  float modTarget = .5;
-
-  if (filteredVelo > .2) modTarget *= 1;
-  else if (filteredVelo < -.2) modTarget *= -1;
-  else modTarget = lastNoFreewheel;
-
-  lastNoFreewheel = modTarget;
-  return modTarget;
+  return mappedTarget;
 }
 
 void motorSetup() {
@@ -74,11 +76,13 @@ void motorLoop() {
   // Stop the motor if not receive any request after 500ms
   // since last command.
   if (millis() - lastMotorRequestMillis > 500) {
-    lastMotorTarget = 0;
+    lastMotorRequestMagnitude = 0;
   }
 
+  int magnitude = lastMotorRequestMagnitude + veloReactiveMagnitude();
+
   // Normal FOC routine.
-  motor.target = lastMotorTarget + noFreewheel();
+  motor.target = magnitudeToTarget(magnitude);
   motor.loopFOC();
   motor.move();
 }

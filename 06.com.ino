@@ -51,6 +51,6 @@ void comLoop() {
   if (cmd == "F") {
     replyWithPositions();
     int magnitude = val.toInt();
-    setMotorTarget(magnitude);
+    setRequestMagnitude(magnitude);
   }
 }
