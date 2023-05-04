@@ -18,7 +18,7 @@ int veloReactiveMagnitude() {
   float velo = sensor.getVelocity();
   float filteredVelo = veloFilter.getFilteredValue(velo);
 
-  int magnitude = 100;
+  int magnitude = -1;
 
   if (filteredVelo > .2) magnitude *= 1;
   else if (filteredVelo < -.2) magnitude *= -1;
@@ -34,7 +34,7 @@ float magnitudeToTarget(int magnitude) {
   if (absMagnitude > 10000) absMagnitude = 10000;
 
   float mapMagnitudeIn[] = {0, 1, 10000};
-  float mapTargetOut[] = {0, 1, 7};
+  float mapTargetOut[] = {0, .9, 7};
   float mappedTarget = multiMap<float>(
                          absMagnitude,
                          mapMagnitudeIn,
