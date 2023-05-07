@@ -18,7 +18,7 @@ int veloReactiveMagnitude() {
   float velo = sensor.getVelocity();
   float filteredVelo = veloFilter.getFilteredValue(velo);
 
-  int magnitude = 1;
+  int magnitude = savedVeloReactiveMagnitude;
 
   if (filteredVelo > .2) magnitude *= 1;
   else if (filteredVelo < -.2) magnitude *= -1;
