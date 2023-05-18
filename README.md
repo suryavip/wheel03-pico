@@ -27,7 +27,7 @@ The software on the PC side that will communicate with vJoy API, which then comm
 
 ## More details coming...
 
-## Thanks to:
+## Thanks to
 - [SimpleFOC](https://simplefoc.com/)
 - [Earle F. Philhower, III](https://github.com/earlephilhower) for the [arduino-pico](https://github.com/earlephilhower/arduino-pico)
 - [Rob Tillaart](https://github.com/RobTillaart) for the [AS5600](https://github.com/RobTillaart/AS5600) and [MultiMap](https://github.com/RobTillaart/MultiMap) libraries
