@@ -1,4 +1,7 @@
-> __Note__: Still in progress to make this public friendly. Please be patience. Feel free to contact me (email on github profile).
+> **Warning**:
+> Still in progress to make this public friendly. Please be patience. Feel free to contact me (email on github profile).
+> If you decide to run this software, make sure you know what you are doing.
+> Electrical fire and explosion can happen if hardware and software not configured properly.
 
 # DIY Force Feedback Steering Wheel
 Code name: `wheel03-pico`
