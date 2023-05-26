@@ -12,6 +12,8 @@ const pin_size_t PIN_PC = 17;     // to RPWM (2nd IBT-2 module)
 // Phase B will be on M- terminal on 1st IBT-2 module.
 // Phase C will be on M+ terminal on 2nd IBT-2 module.
 
-const pin_size_t PIN_ACCELERATOR = A1;
-const pin_size_t PIN_BRAKE = A0;
-const pin_size_t PIN_CLUTCH = A2;
+const pin_size_t PIN_ADS1115_SDA = 2;
+const pin_size_t PIN_ADS1115_SCL = 3;
+const pin_size_t PIN_ACCELERATOR = 0;  // on ADS1115
+const pin_size_t PIN_BRAKE = 1;        // on ADS1115
+const pin_size_t PIN_CLUTCH = 2;       // on ADS1115

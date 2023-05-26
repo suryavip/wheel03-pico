@@ -1,40 +1,29 @@
-Kalman accFilter(0.1, 32, 4095, 0);
-Kalman brkFilter(0.1, 32, 4095, 0);
-Kalman cltFilter(0.1, 32, 4095, 0);
+int16_t accValue = 0;
+int16_t brkValue = 0;
+int16_t cltValue = 0;
 
-int accValue = 0;
-int brkValue = 0;
-int cltValue = 0;
+ADS1115 ads1115(0x48, &Wire1);
 
 void pedalsSetup() {
-  analogReadResolution(12);
+  Wire1.setSDA(PIN_ADS1115_SDA);
+  Wire1.setSCL(PIN_ADS1115_SCL);
+  
+  ads1115.begin();
+  ads1115.setDataRate(7);
+  ads1115.setGain(1);
 }
 
 void pedalsLoop() {
-  int acc = analogRead(PIN_ACCELERATOR);
-  int brk = analogRead(PIN_BRAKE);
-  int clt = analogRead(PIN_CLUTCH);
-
-  accValue = accFilter.getFilteredValue(acc);
-  brkValue = brkFilter.getFilteredValue(brk);
-  cltValue = cltFilter.getFilteredValue(clt);
+  accValue = ads1115.readADC(PIN_ACCELERATOR);
+  brkValue = ads1115.readADC(PIN_BRAKE);
+  cltValue = ads1115.readADC(PIN_CLUTCH);
 
   if (isPedalsDebug) {
-    Serial.print("Min:");
-    Serial.print(0);
-    Serial.print(",A:");
-    Serial.print(acc);
-    Serial.print(",AF:");
+    Serial.print("A:");
     Serial.print(accValue);
     Serial.print(",B:");
-    Serial.print(brk);
-    Serial.print(",BF:");
     Serial.print(brkValue);
     Serial.print(",C:");
-    Serial.print(clt);
-    Serial.print(",CF:");
-    Serial.print(cltValue);
-    Serial.print(",Max:");
-    Serial.println(4095);
+    Serial.println(cltValue);
   }
 }

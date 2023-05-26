@@ -3,6 +3,7 @@
 #include <MultiMap.h>
 #include <Kalman.h>
 #include <LittleFS.h>
+#include <ADS1X15.h>
 
 #define isConfigDebug false
 #define isMotorDebug false
