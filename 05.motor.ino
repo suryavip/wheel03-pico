@@ -58,7 +58,7 @@ void motorSetup() {
   motor.velocity_limit = 60;
   motor.controller = MotionControlType::torque;
   motor.torque_controller = TorqueControlType::voltage;
-  motor.foc_modulation = FOCModulationType::SpaceVectorPWM;
+  motor.foc_modulation = FOCModulationType::SinePWM;
 
   motor.init();
   motor.initFOC();
