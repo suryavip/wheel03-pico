@@ -7,7 +7,6 @@ Kalman veloFilter(0.01, 32, 1023, 0);
 
 unsigned int lastMotorRequestMillis = 0;
 int lastMotorRequestMagnitude = 0;
-int lastVeloReactiveMagnitude = 0;
 
 void setRequestMagnitude(int magnitude) {
   lastMotorRequestMagnitude = magnitude;
@@ -20,11 +19,10 @@ int veloReactiveMagnitude() {
 
   int magnitude = savedVeloReactiveMagnitude;
 
-  if (filteredVelo > .2) magnitude *= 1;
-  else if (filteredVelo < -.2) magnitude *= -1;
-  else magnitude = lastVeloReactiveMagnitude;
+  if (filteredVelo > .3) magnitude *= 1;
+  else if (filteredVelo < -.3) magnitude *= -1;
+  else magnitude = 0;
 
-  lastVeloReactiveMagnitude = magnitude;
   return magnitude;
 }
 
