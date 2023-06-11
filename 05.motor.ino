@@ -34,7 +34,7 @@ float magnitudeToTarget(int magnitude) {
   if (absMagnitude > 10000) absMagnitude = 10000;
 
   float mapMagnitudeIn[] = {0, 1, 10000};
-  float mapTargetOut[] = {0, .9, 7};
+  float mapTargetOut[] = {0, .8, 7};
   float mappedTarget = multiMap<float>(
                          absMagnitude,
                          mapMagnitudeIn,
