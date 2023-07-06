@@ -20,12 +20,12 @@ Code name: `wheel03-pico`
 
 ## Data Communication Strategy
 A bit unique because this microcontroller is not communicate directly with directX or any other game API.
-This microcontroller is just communicating to a software on the PC side via USB serial.
+This microcontroller is just communicating to a [software on the PC](https://github.com/suryavip/wheel01-pc) side via USB serial.
 The software on the PC side that will communicate with vJoy API, which then communicate to game API.
 
 `Microcontroller` ↔ `Software on PC` ↔ `vJoy` ↔ `Game`.
 
-## More details coming...
+## More details are coming soon...
 
 ## Thanks to
 - [SimpleFOC](https://simplefoc.com/)
