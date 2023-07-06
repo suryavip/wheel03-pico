@@ -15,7 +15,7 @@ Code name: `wheel03-pico`
 - Position sensor: AS5600
 - Power supply: FSP 24V, but generic 12V 10A PSU will also works with voltage adjustment on code.
 - Motor control software: SimpleFOC
-- PC side software: Custom (public repo coming soon) and vJoy
+- PC side software: https://github.com/suryavip/wheel01-pc and vJoy
 - Pedals: currently using Thrustmaster T3PA set
 
 ## Data Communication Strategy
