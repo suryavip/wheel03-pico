@@ -7,7 +7,7 @@ ADS1115 ads1115(0x48, &Wire1);
 void pedalsSetup() {
   Wire1.setSDA(PIN_ADS1115_SDA);
   Wire1.setSCL(PIN_ADS1115_SCL);
-  
+
   ads1115.begin();
   ads1115.setDataRate(7);
   ads1115.setGain(1);
