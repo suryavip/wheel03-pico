@@ -15,17 +15,17 @@ Code name: `wheel03-pico`
 - Position sensor: AS5600
 - Power supply: FSP 24V, but generic 12V 10A PSU will also works with voltage adjustment on code.
 - Motor control software: SimpleFOC
-- PC side software: Custom (public repo coming soon) and vJoy
+- PC side software: https://github.com/suryavip/wheel01-pc and vJoy
 - Pedals: currently using Thrustmaster T3PA set
 
 ## Data Communication Strategy
 A bit unique because this microcontroller is not communicate directly with directX or any other game API.
-This microcontroller is just communicating to a software on the PC side via USB serial.
+This microcontroller is just communicating to a [software on the PC](https://github.com/suryavip/wheel01-pc) side via USB serial.
 The software on the PC side that will communicate with vJoy API, which then communicate to game API.
 
 `Microcontroller` ↔ `Software on PC` ↔ `vJoy` ↔ `Game`.
 
-## More details coming...
+## More details are coming soon...
 
 ## Thanks to
 - [SimpleFOC](https://simplefoc.com/)
