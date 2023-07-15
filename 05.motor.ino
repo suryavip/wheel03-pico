@@ -39,8 +39,8 @@ float calculateZeroElectricAngle() {
 }
 
 float magnitudeToTarget(int magnitude) {
-  float mapIn[] =  { -10001, -10000,  -1, 0,  1, 10000, 10001};
-  float mapOut[] = {     -7,     -7, -.9, 0, .9,     7,     7};
+  float mapIn[]   = { -10001, -10000,  -1, 0,  1, 10000, 10001};
+  float mapOut[]  = {     -7,     -7, -.9, 0, .9,     7,     7};
   float mapResult = multiMap<float>(magnitude, mapIn, mapOut, 7);
 
   if (isMotorDebug) Serial.println(mapResult);
