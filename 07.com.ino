@@ -53,9 +53,4 @@ void comLoop() {
     int magnitude = val.toInt();
     setRequestMagnitude(magnitude);
   }
-
-  if (cmd == "V") {
-    int magnitude = val.toInt();
-    setSavedVeloReactiveMagnitude(magnitude);
-  }
 }

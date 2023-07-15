@@ -25,11 +25,7 @@ void keepTrackVelo() {
 float additionalVoltageMultiplier() {
   float mapIn[]   = { -31, -30, -.5, .5, 30, 31};
   float mapOut[]  = {   2,   2,   1,  1,  2,  2};
-  float mapResult = multiMap<float>(
-                      filteredVelo,
-                      mapIn,
-                      mapOut,
-                      6);
+  float mapResult = multiMap<float>(filteredVelo, mapIn, mapOut, 6);
 
   return mapResult;
 }
@@ -37,11 +33,7 @@ float additionalVoltageMultiplier() {
 float calculateZeroElectricAngle() {
   float mapIn[]   = { -31, -30, -.5, .5,  30,  31};
   float mapOut[]  = {  .2,  .2,   0,  0, -.2, -.2};
-  float mapResult = multiMap<float>(
-                      filteredVelo,
-                      mapIn,
-                      mapOut,
-                      6);
+  float mapResult = multiMap<float>(filteredVelo, mapIn, mapOut, 6);
 
   return MOTOR_ZERO_ELECTRICAL_ANGLE + mapResult;
 }
@@ -49,11 +41,7 @@ float calculateZeroElectricAngle() {
 float magnitudeToTarget(int magnitude) {
   float mapIn[] =  { -10001, -10000,  -1, 0,  1, 10000, 10001};
   float mapOut[] = {     -7,     -7, -.9, 0, .9,     7,     7};
-  float mapResult = multiMap<float>(
-                      magnitude,
-                      mapIn,
-                      mapOut,
-                      7);
+  float mapResult = multiMap<float>(magnitude, mapIn, mapOut, 7);
 
   if (isMotorDebug) Serial.println(mapResult);
   return mapResult;

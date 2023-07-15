@@ -1,14 +1,14 @@
-const String CONFIG_PATH_VELO_REACTIVE_MAGNITUDE = "velo_reactive_magnitude";
+//const String CONFIG_PATH_VELO_REACTIVE_MAGNITUDE = "velo_reactive_magnitude";
 
 LittleFSConfig cfg;
 
-int savedVeloReactiveMagnitude = 0;
+//int savedVeloReactiveMagnitude = 0;
 
-void setSavedVeloReactiveMagnitude(int newVeloReactiveMagnitude) {
-  savedVeloReactiveMagnitude = newVeloReactiveMagnitude;
-  String content = String(savedVeloReactiveMagnitude, DEC);
-  writeToFile(CONFIG_PATH_VELO_REACTIVE_MAGNITUDE, content);
-}
+//void setSavedVeloReactiveMagnitude(int newVeloReactiveMagnitude) {
+//  savedVeloReactiveMagnitude = newVeloReactiveMagnitude;
+//  String content = String(savedVeloReactiveMagnitude, DEC);
+//  writeToFile(CONFIG_PATH_VELO_REACTIVE_MAGNITUDE, content);
+//}
 
 void writeToFile(String filePath, String content) {
   int toWriteLen = content.length() + 1;
@@ -52,6 +52,6 @@ void configSetup() {
   LittleFS.setConfig(cfg);
   LittleFS.begin();
 
-  String savedVeloReactiveMagnitudeRead = readOrPrep(CONFIG_PATH_VELO_REACTIVE_MAGNITUDE, "0");
-  savedVeloReactiveMagnitude = savedVeloReactiveMagnitudeRead.toInt();
+  //  String savedVeloReactiveMagnitudeRead = readOrPrep(CONFIG_PATH_VELO_REACTIVE_MAGNITUDE, "0");
+  //  savedVeloReactiveMagnitude = savedVeloReactiveMagnitudeRead.toInt();
 }
