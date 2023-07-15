@@ -32,7 +32,7 @@ float additionalVoltageMultiplier() {
 
 float calculateZeroElectricAngle() {
   float mapIn[]   = { -31, -30, -.5, .5,  30,  31};
-  float mapOut[]  = {  .2,  .2,   0,  0, -.2, -.2};
+  float mapOut[]  = {  .5,  .5,   0,  0, -.5, -.5};
   float mapResult = multiMap<float>(filteredVelo, mapIn, mapOut, 6);
 
   return MOTOR_ZERO_ELECTRICAL_ANGLE + mapResult;
