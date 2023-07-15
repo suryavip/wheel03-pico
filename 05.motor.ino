@@ -1,22 +1,31 @@
 const unsigned int MOTOR_POLE_PAIRS = 15;
-const unsigned int MOTOR_VOLTAGE_LIMIT = 7;
-const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 3;
+const unsigned int MOTOR_VOLTAGE_LIMIT = 10;
+const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 4;
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 Kalman veloFilter(0.01, 32, 1023, 0);
 
 unsigned int lastMotorRequestMillis = 0;
 int lastMotorRequestMagnitude = 0;
+float filteredVelo = 0;
 
 void setRequestMagnitude(int magnitude) {
   lastMotorRequestMagnitude = magnitude;
   lastMotorRequestMillis = millis();
 }
 
-int veloReactiveMagnitude() {
+void keepTrackVelo() {
   float velo = sensor.getVelocity();
-  float filteredVelo = veloFilter.getFilteredValue(velo);
+  filteredVelo = veloFilter.getFilteredValue(velo);
 
+  if (isMotorDebug) {
+    Serial.print("VELO:");
+    Serial.print(filteredVelo);
+    Serial.println(";");
+  }
+}
+
+int veloReactiveMagnitude() {
   int magnitude = savedVeloReactiveMagnitude;
 
   if (filteredVelo > .3) magnitude *= 1;
@@ -26,13 +35,30 @@ int veloReactiveMagnitude() {
   return magnitude;
 }
 
+float additionalVoltageMultiplier() {
+  int absVelo = abs(filteredVelo);
+
+  if (absVelo > 30) absVelo = 30;
+
+  float mapVeloIn[] = {0, .5, 30};
+  float mapMultOut[] = {1, 1, 2};
+  float mappedMult = multiMap<float>(
+                       absVelo,
+                       mapVeloIn,
+                       mapMultOut,
+                       3);
+
+  if (isMotorDebug) Serial.println(mappedMult);
+  return mappedMult;
+}
+
 float magnitudeToTarget(int magnitude) {
   int absMagnitude = abs(magnitude);
 
   if (absMagnitude > 10000) absMagnitude = 10000;
 
   float mapMagnitudeIn[] = {0, 1, 10000};
-  float mapTargetOut[] = {0, .8, 7};
+  float mapTargetOut[] = {0, .9, 7};
   float mappedTarget = multiMap<float>(
                          absMagnitude,
                          mapMagnitudeIn,
@@ -79,10 +105,11 @@ void motorLoop() {
     lastMotorRequestMagnitude = 0;
   }
 
+  keepTrackVelo();
   int magnitude = lastMotorRequestMagnitude + veloReactiveMagnitude();
 
   // Normal FOC routine.
-  motor.target = magnitudeToTarget(magnitude);
+  motor.target = magnitudeToTarget(magnitude) * additionalVoltageMultiplier();
   motor.loopFOC();
   motor.move();
 }
