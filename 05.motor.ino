@@ -57,6 +57,7 @@ void motorSetup() {
   motor.controller = MotionControlType::torque;
   motor.torque_controller = TorqueControlType::voltage;
   motor.foc_modulation = FOCModulationType::SinePWM;
+  motor.zero_electric_angle = 2.80; // DON'T FORGOT TO ADJUST THIS
 
   motor.init();
   motor.initFOC();
