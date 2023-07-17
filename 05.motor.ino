@@ -1,5 +1,5 @@
 const unsigned int MOTOR_POLE_PAIRS = 15;
-const unsigned int MOTOR_VOLTAGE_LIMIT = 10;
+const unsigned int MOTOR_VOLTAGE_LIMIT = 9;
 const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 4;
 const float MOTOR_ZERO_ELECTRICAL_ANGLE = 2.79; // DON'T FORGOT TO ADJUST THIS
 
@@ -23,24 +23,24 @@ void keepTrackVelo() {
 }
 
 float additionalVoltageMultiplier() {
-  float mapIn[]   = { -31, -30, -.5, .5, 30, 31};
-  float mapOut[]  = {   2,   2,   1,  1,  2,  2};
+  float mapIn[]   = { -60, -20, -.5, .5,  20,  60};
+  float mapOut[]  = { 1.3, 1.3,   1,  1, 1.3, 1.3};
   float mapResult = multiMap<float>(filteredVelo, mapIn, mapOut, 6);
 
   return mapResult;
 }
 
 float calculateZeroElectricAngle() {
-  float mapIn[]   = { -31, -30, -.5, .5,  30,  31};
-  float mapOut[]  = {  .5,  .5,   0,  0, -.5, -.5};
+  float mapIn[]   = { -60, -5, -.5, .5,   5,  60};
+  float mapOut[]  = {  .8, .8,   0,  0, -.8, -.8};
   float mapResult = multiMap<float>(filteredVelo, mapIn, mapOut, 6);
 
   return MOTOR_ZERO_ELECTRICAL_ANGLE + mapResult;
 }
 
 float magnitudeToTarget(int magnitude) {
-  float mapIn[]   = { -10001, -10000,  -1, 0,  1, 10000, 10001};
-  float mapOut[]  = {     -7,     -7, -.9, 0, .9,     7,     7};
+  float mapIn[]   = { -10001, -10000, -1, 0, 1, 10000, 10001};
+  float mapOut[]  = {     -7,     -7, -1, 0, 1,     7,     7};
   float mapResult = multiMap<float>(magnitude, mapIn, mapOut, 7);
 
   if (isMotorDebug) Serial.println(mapResult);
