@@ -1,4 +1,5 @@
 //const String CONFIG_PATH_VELO_REACTIVE_MAGNITUDE = "velo_reactive_magnitude";
+const String CONFIG_PATH_MINIMUM_OUTPUT_VOLTAGE = "minimum_output_voltage";
 
 LittleFSConfig cfg;
 
@@ -9,6 +10,14 @@ LittleFSConfig cfg;
 //  String content = String(savedVeloReactiveMagnitude, DEC);
 //  writeToFile(CONFIG_PATH_VELO_REACTIVE_MAGNITUDE, content);
 //}
+
+float savedMinimumOutputVoltage = .8;
+
+void setSavedMinimumOutputVoltage(float newMinimumOutputVoltage) {
+  savedMinimumOutputVoltage = newMinimumOutputVoltage;
+  String content = String(savedMinimumOutputVoltage, 3);
+  writeToFile(CONFIG_PATH_MINIMUM_OUTPUT_VOLTAGE, content);
+}
 
 void writeToFile(String filePath, String content) {
   int toWriteLen = content.length() + 1;
@@ -52,6 +61,9 @@ void configSetup() {
   LittleFS.setConfig(cfg);
   LittleFS.begin();
 
-  //  String savedVeloReactiveMagnitudeRead = readOrPrep(CONFIG_PATH_VELO_REACTIVE_MAGNITUDE, "0");
-  //  savedVeloReactiveMagnitude = savedVeloReactiveMagnitudeRead.toInt();
+  //String savedVeloReactiveMagnitudeRead = readOrPrep(CONFIG_PATH_VELO_REACTIVE_MAGNITUDE, "0");
+  //savedVeloReactiveMagnitude = savedVeloReactiveMagnitudeRead.toInt();
+
+  String savedMinimumOutputVoltageRead = readOrPrep(CONFIG_PATH_MINIMUM_OUTPUT_VOLTAGE, "0.8");
+  savedMinimumOutputVoltage = savedMinimumOutputVoltageRead.toFloat();
 }

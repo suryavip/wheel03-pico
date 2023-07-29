@@ -53,4 +53,9 @@ void comLoop() {
     int magnitude = val.toInt();
     setRequestMagnitude(magnitude);
   }
+
+  if (cmd == "M") {
+    float minimumOutputVoltage = val.toFloat();
+    setSavedMinimumOutputVoltage(minimumOutputVoltage);
+  }
 }
