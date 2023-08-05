@@ -38,13 +38,13 @@ float calculateZeroElectricAngle() {
   return MOTOR_ZERO_ELECTRICAL_ANGLE + mapResult;
 }
 
-float magnitudeToTarget(int magnitude) {
+float magnitudeToTarget() {
   float minPositive = savedMinimumOutputVoltage;
   float minNegative = savedMinimumOutputVoltage * -1;
 
   float mapIn[]   = { -10001, -10000,          -1, 0,           1, 10000, 10001};
   float mapOut[]  = {     -7,     -7, minNegative, 0, minPositive,     7,     7};
-  float mapResult = multiMap<float>(magnitude, mapIn, mapOut, 7);
+  float mapResult = multiMap<float>(lastMotorRequestMagnitude, mapIn, mapOut, 7);
 
   if (isMotorDebug) Serial.println(mapResult);
   return mapResult;
@@ -86,7 +86,7 @@ void motorLoop() {
   // Normal FOC routine.
   keepTrackVelo();
   motor.zero_electric_angle = calculateZeroElectricAngle();
-  motor.target = magnitudeToTarget(lastMotorRequestMagnitude) * additionalVoltageMultiplier();
+  motor.target = magnitudeToTarget() * additionalVoltageMultiplier();
   motor.loopFOC();
   motor.move();
 }
