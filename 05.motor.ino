@@ -4,7 +4,7 @@ const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 4;
 const float MOTOR_ZERO_ELECTRICAL_ANGLE = 2.79; // DON'T FORGOT TO ADJUST THIS
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
-Kalman veloFilter(0.01, 32, 1023, 0);
+Kalman veloFilter(0.01, 16, 1023, 0);
 
 unsigned int lastMotorRequestMillis = 0;
 int lastMotorRequestMagnitude = 0;
