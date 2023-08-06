@@ -43,9 +43,9 @@ float zeaOffsetByVelo() {
 }
 
 float zeaOffsetByMagnitude() {
-  float mapIn[]   = { -1001, -1000,  -1, 1, 1000, 1001};
-  float mapOut[]  = {     0,     0, -.4, 4,    0,    0};
-  float mapResult = multiMap<float>(lastMotorRequestMagnitude, mapIn, mapOut, 6);
+  float mapIn[]   = { -10000, -1, 0,   1, 10000};
+  float mapOut[]  = {      0, .4, 0, -.4,     0};
+  float mapResult = multiMap<float>(lastMotorRequestMagnitude, mapIn, mapOut, 5);
 
   return mapResult;
 }
