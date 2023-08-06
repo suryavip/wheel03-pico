@@ -13,6 +13,7 @@ void setup() {
 void loop() {
   pedalsLoop();
   comLoop();
+  sensorLoop();
 }
 
 void loop1() {

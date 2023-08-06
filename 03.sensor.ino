@@ -5,9 +5,11 @@ const unsigned int SENSOR_I2C_CLOCK = 400 * 1000;
 
 AS5600 as5600;
 GenericSensor sensor;
+Kalman veloFilter(0.01, 16, 1023, 0);
 
 int currentRawAngle = -1;
 int overRotation = 0;
+float filteredVelo = 0;
 
 float readMySensorCallback() {
   int newPosition = as5600.rawAngle();
@@ -35,4 +37,9 @@ void sensorSetup() {
   as5600.begin();
   sensor = GenericSensor(readMySensorCallback);
   sensor.init();
+}
+
+void sensorLoop() {
+  float velo = sensor.getVelocity();
+  filteredVelo = veloFilter.getFilteredValue(velo);
 }
