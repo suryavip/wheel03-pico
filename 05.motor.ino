@@ -9,6 +9,8 @@ unsigned int lastMotorRequestMillis = 0;
 int lastMotorRequestMagnitude = 0;
 
 void setRequestMagnitude(int magnitude) {
+  if (magnitude > 10000) magnitude = 10000;
+  if (magnitude < -10000) magnitude = -10000;
   lastMotorRequestMagnitude = magnitude;
   lastMotorRequestMillis = millis();
 }
@@ -25,9 +27,9 @@ float voltageByMagnitude() {
   float minPositive = savedMinimumOutputVoltage;
   float minNegative = minPositive * -1;
 
-  float mapIn[]   = { -10001, -10000,          -1, 0,           1, 10000, 10001};
-  float mapOut[]  = {     -7,     -7, minNegative, 0, minPositive,     7,     7};
-  float mapResult = multiMap<float>(lastMotorRequestMagnitude, mapIn, mapOut, 7);
+  float mapIn[]   = { -10000,          -1, 0,           1, 10000};
+  float mapOut[]  = {     -7, minNegative, 0, minPositive,     7};
+  float mapResult = multiMap<float>(lastMotorRequestMagnitude, mapIn, mapOut, 5);
 
   return mapResult;
 }
