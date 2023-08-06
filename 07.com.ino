@@ -58,35 +58,4 @@ void comLoop() {
     float minimumOutputVoltage = val.toFloat();
     setSavedMinimumOutputVoltage(minimumOutputVoltage);
   }
-
-  if (cmd == "C") {
-    savedMinimumOutputVoltage = 0;
-
-    Serial.println("START_POS,END_POS,REQUIRED_POWER");
-
-    int count = 0;
-    while (count < SENSOR_PPR) {
-      Serial.print(currentRawAngle);
-
-      int hold = currentRawAngle + 0;
-      int m = 1600;
-      while (true) {
-        setRequestMagnitude(m);
-        delay(100);
-        while (lastMotorRequestMagnitude > 0) {}
-        if (abs(currentRawAngle - hold) > 10) break;
-        m += 10;
-        delay(500);
-      }
-
-      Serial.print(",");
-      Serial.print(currentRawAngle);
-      Serial.print(",");
-      Serial.println(m);
-
-      delay(1000);
-      count++;
-    }
-    Serial.println("COMPLETED!");
-  }
 }
