@@ -5,11 +5,15 @@ const unsigned int SENSOR_I2C_CLOCK = 400 * 1000;
 
 AS5600 as5600;
 GenericSensor sensor;
-Kalman veloFilter(0.01, 16, 1023, 0);
 
 int currentRawAngle = -1;
 int overRotation = 0;
-float filteredVelo = 0;
+
+// speed measurement
+int lastRawAngle = -1;
+int lastOverRotation = 0;
+unsigned int lastVeloMillis = 0;
+double lastVelo = 0;
 
 float readMySensorCallback() {
   int newPosition = as5600.rawAngle();
@@ -27,7 +31,34 @@ float readMySensorCallback() {
 
   double rawAngleInDouble = currentRawAngle;
   double percent = rawAngleInDouble / SENSOR_PPR;
+
   return TWO_PI * percent;
+}
+
+void keepTrackVelocity() {
+  int td = millis() - lastVeloMillis;
+  if (td < 1) return;
+
+  if (lastRawAngle < 0) {
+    // Initial recording
+    lastRawAngle = currentRawAngle;
+    lastOverRotation = overRotation;
+    lastVeloMillis = millis();
+    return;
+  }
+
+  int c = currentRawAngle + (SENSOR_PPR * overRotation);
+  int l = lastRawAngle + (SENSOR_PPR * lastOverRotation);
+  double d = c - l;
+  double pd = d / SENSOR_PPR;
+  double rd = TWO_PI * pd;
+  double v = rd / (double)td;  // rad/ms
+  v *= 1000;                   // rad/s
+  lastVelo = v;
+
+  lastRawAngle = currentRawAngle;
+  lastOverRotation = overRotation;
+  lastVeloMillis = millis();
 }
 
 void sensorSetup() {
@@ -40,6 +71,5 @@ void sensorSetup() {
 }
 
 void sensorLoop() {
-  float velo = sensor.getVelocity();
-  filteredVelo = veloFilter.getFilteredValue(velo);
+  keepTrackVelocity();
 }
