@@ -37,7 +37,7 @@ float readMySensorCallback() {
 
 void keepTrackVelocity() {
   int td = millis() - lastVeloMillis;
-  if (td < 1) return;
+  if (td < 2) return;
 
   if (lastRawAngle < 0) {
     // Initial recording
