@@ -16,9 +16,9 @@ void setRequestMagnitude(int magnitude) {
 }
 
 float voltageMultiplierByVelo() {
-  float mapIn[]   = { -60, -20, -.5, .5,  20,  60};
-  float mapOut[]  = { 1.3, 1.3,   1,  1, 1.3, 1.3};
-  float mapResult = multiMap<float>(filteredVelo, mapIn, mapOut, 6);
+  float mapIn[]   = { -10, 0,  10};
+  float mapOut[]  = { 1.3, 1, 1.3};
+  float mapResult = multiMap<float>(lastVelo, mapIn, mapOut, 3);
 
   return mapResult;
 }
@@ -35,12 +35,9 @@ float voltageByMagnitude() {
 }
 
 float zeaOffsetByVelo() {
-  float mapIn[]   = { -60, -5, -.5, .5,   5,  60};
-  float mapOut[]  = {  .8, .8,   0,  0, -.8, -.8};
-  float mapResult = multiMap<float>(filteredVelo, mapIn, mapOut, 6);
-
-  return mapResult;
-}
+  float mapIn[]   = { -5, 0,   5};
+  float mapOut[]  = { .8, 0, -.8};
+  float mapResult = multiMap<float>(lastVelo, mapIn, mapOut, 3);
 
   return mapResult;
 }
