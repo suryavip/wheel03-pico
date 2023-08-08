@@ -42,11 +42,6 @@ float zeaOffsetByVelo() {
   return mapResult;
 }
 
-float zeaOffsetByMagnitude() {
-  float mapIn[]   = { -10000, -1, 0,   1, 10000};
-  float mapOut[]  = {      0, .4, 0, -.4,     0};
-  float mapResult = multiMap<float>(lastMotorRequestMagnitude, mapIn, mapOut, 5);
-
   return mapResult;
 }
 
@@ -84,7 +79,7 @@ void motorLoop() {
   }
 
   // Normal FOC routine.
-  float zeaAdjustment = zeaOffsetByMagnitude() + zeaOffsetByVelo();
+  float zeaAdjustment = zeaOffsetByVelo();
   if (zeaAdjustment > .8) zeaAdjustment = .8;
   if (zeaAdjustment < -.8) zeaAdjustment = -.8;
   motor.zero_electric_angle = MOTOR_ZERO_ELECTRICAL_ANGLE + zeaAdjustment;
