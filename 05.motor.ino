@@ -16,7 +16,7 @@ void setRequestMagnitude(int magnitude) {
 }
 
 float voltageMultiplierByVelo() {
-  float mapIn[]   = { -10, 0,  10};
+  float mapIn[]   = { -15, 0,  15};
   float mapOut[]  = { 1.3, 1, 1.3};
   float mapResult = multiMap<float>(lastVelo, mapIn, mapOut, 3);
 
