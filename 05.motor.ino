@@ -1,12 +1,13 @@
 const unsigned int MOTOR_POLE_PAIRS = 15;
 const unsigned int MOTOR_VOLTAGE_LIMIT = 9;
 const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 4;
-const float MOTOR_ZERO_ELECTRICAL_ANGLE = 2.80; // DON'T FORGOT TO ADJUST THIS
+//const float MOTOR_ZERO_ELECTRICAL_ANGLE = 2.80; // DON'T FORGOT TO ADJUST THIS
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 
 unsigned int lastMotorRequestMillis = 0;
 int lastMotorRequestMagnitude = 0;
+float zeroElectricalAngle;
 
 void setRequestMagnitude(int magnitude) {
   if (magnitude > 10000) magnitude = 10000;
@@ -54,10 +55,12 @@ void motorSetup() {
   motor.torque_controller = TorqueControlType::voltage;
   motor.foc_modulation = FOCModulationType::SinePWM;
   motor.motion_downsample = 2;
-  motor.zero_electric_angle = MOTOR_ZERO_ELECTRICAL_ANGLE;
+  //  motor.zero_electric_angle = MOTOR_ZERO_ELECTRICAL_ANGLE;
 
   motor.init();
   motor.initFOC();
+
+  zeroElectricalAngle = motor.zero_electric_angle;
 }
 
 void motorLoop() {
@@ -79,7 +82,7 @@ void motorLoop() {
   float zeaAdjustment = zeaOffsetByVelo();
   if (zeaAdjustment > .8) zeaAdjustment = .8;
   if (zeaAdjustment < -.8) zeaAdjustment = -.8;
-  motor.zero_electric_angle = MOTOR_ZERO_ELECTRICAL_ANGLE + zeaAdjustment;
+  motor.zero_electric_angle = zeroElectricalAngle + zeaAdjustment;
 
   float baseVoltage = voltageByMagnitude();
   float veloAdjustedVoltage = baseVoltage * voltageMultiplierByVelo();
