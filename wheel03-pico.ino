@@ -3,6 +3,7 @@
 #include <MultiMap.h>  // https://github.com/RobTillaart/MultiMap
 #include <LittleFS.h>
 #include <ADS1X15.h>   // https://github.com/RobTillaart/ADS1X15
+#include <HX711.h>     // https://github.com/bogde/HX711
 
 #define isConfigDebug false
 #define isMotorDebug false

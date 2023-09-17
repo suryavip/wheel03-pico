@@ -17,3 +17,6 @@ const pin_size_t PIN_ADS1115_SCL = 3;
 const pin_size_t PIN_ACCELERATOR = 0;  // on ADS1115
 const pin_size_t PIN_BRAKE = 1;        // on ADS1115
 const pin_size_t PIN_CLUTCH = 2;       // on ADS1115
+
+const pin_size_t PIN_LOADCELL_DT = 4;
+const pin_size_t PIN_LOADCELL_CL = 5;
