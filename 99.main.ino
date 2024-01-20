@@ -1,7 +1,7 @@
 bool setupDone = false;
 
 void setup() {
-  configSetup();
+//  configSetup();
   pedalsSetup();
   comSetup();
   sensorSetup();

@@ -6,13 +6,11 @@ const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 4;
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 
 unsigned int lastMotorRequestMillis = 0;
-int lastMotorRequestMagnitude = 0;
+float lastMotorRequestVoltage = 0;
 float zeroElectricalAngle;
 
-void setRequestMagnitude(int magnitude) {
-  if (magnitude > 10000) magnitude = 10000;
-  if (magnitude < -10000) magnitude = -10000;
-  lastMotorRequestMagnitude = magnitude;
+void setRequestVoltage(float v) {
+  lastMotorRequestVoltage = v;
   lastMotorRequestMillis = millis();
 }
 
@@ -24,21 +22,13 @@ float voltageMultiplierByVelo() {
   return mapResult;
 }
 
-float voltageByMagnitude() {
-  float minPositive = savedMinimumOutputVoltage;
-  float minNegative = minPositive * -1;
-
-  float mapIn[]   = { -10000,          -1, 0,           1, 10000};
-  float mapOut[]  = {     -7, minNegative, 0, minPositive,     7};
-  float mapResult = multiMap<float>(lastMotorRequestMagnitude, mapIn, mapOut, 5);
-
-  return mapResult;
-}
-
 float zeaOffsetByVelo() {
   float mapIn[]   = { -5, 0,   5};
   float mapOut[]  = { .8, 0, -.8};
   float mapResult = multiMap<float>(lastVelo, mapIn, mapOut, 3);
+
+  if (mapResult > .8) mapResult = .8;
+  if (mapResult < -.8) mapResult = -.8;
 
   return mapResult;
 }
@@ -75,18 +65,12 @@ void motorLoop() {
   // Stop the motor if not receive any request after 500ms
   // since last command.
   if (millis() - lastMotorRequestMillis > 500) {
-    lastMotorRequestMagnitude = 0;
+    lastMotorRequestVoltage = 0;
   }
 
   // Normal FOC routine.
-  float zeaAdjustment = zeaOffsetByVelo();
-  if (zeaAdjustment > .8) zeaAdjustment = .8;
-  if (zeaAdjustment < -.8) zeaAdjustment = -.8;
-  motor.zero_electric_angle = zeroElectricalAngle + zeaAdjustment;
-
-  float baseVoltage = voltageByMagnitude();
-  float veloAdjustedVoltage = baseVoltage * voltageMultiplierByVelo();
-  motor.target = veloAdjustedVoltage;
+  motor.zero_electric_angle = zeroElectricalAngle + zeaOffsetByVelo();
+  motor.target = lastMotorRequestVoltage * voltageMultiplierByVelo();
 
   motor.loopFOC();
   motor.move();
