@@ -10,7 +10,7 @@ void replyWithPositions() {
   Serial.print(output);
 }
 
-void parser(String & valRef) {
+void parser(String& valRef) {
   String val = "";
 
   char read = Serial.read();

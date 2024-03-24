@@ -16,16 +16,16 @@ void setRequestVoltage(float v) {
 }
 
 float voltageMultiplierByVelo() {
-  float mapIn[]   = { -21, 0, 21};
-  float mapOut[]  = {   2, 1,  2};
+  float mapIn[] = { -21, 0, 21 };
+  float mapOut[] = { 2, 1, 2 };
   float mapResult = multiMap<float>(lastVelo, mapIn, mapOut, 3);
 
   return mapResult;
 }
 
 float zeaOffsetByVelo() {
-  float mapIn[]   = { -5, 0,   5};
-  float mapOut[]  = { .8, 0, -.8};
+  float mapIn[] = { -5, 0, 5 };
+  float mapOut[] = { .8, 0, -.8 };
   float mapResult = multiMap<float>(lastVelo, mapIn, mapOut, 3);
 
   if (mapResult > .8) mapResult = .8;
@@ -54,7 +54,7 @@ void motorSetup() {
   motor.controller = MotionControlType::torque;
   motor.torque_controller = TorqueControlType::voltage;
   motor.foc_modulation = FOCModulationType::SinePWM;
-  motor.motion_downsample = 2;
+  motor.motion_downsample = 1;
 
   motor.init();
   motor.initFOC();
