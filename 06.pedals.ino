@@ -8,6 +8,7 @@ HX711 loadCell;
 void pedalsSetup() {
   Wire1.setSDA(PIN_ADS1115_SDA);
   Wire1.setSCL(PIN_ADS1115_SCL);
+  Wire1.begin();
 
   ads1115.begin();
   ads1115.setDataRate(7);

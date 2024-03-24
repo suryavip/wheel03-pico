@@ -65,6 +65,7 @@ void sensorSetup() {
   Wire.setSDA(PIN_SENSOR_SDA);
   Wire.setSCL(PIN_SENSOR_SCL);
   Wire.setClock(SENSOR_I2C_CLOCK);
+  Wire.begin();
   as5600.begin();
   sensor = GenericSensor(readMySensorCallback);
   sensor.init();
