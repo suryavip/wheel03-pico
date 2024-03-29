@@ -7,8 +7,9 @@ BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 unsigned int lastMotorRequestMillis = 0;
 float lastMotorRequestVoltage = 0;
 
-float zeaPositions[MOTOR_POLE_PAIRS];
-float zeas[MOTOR_POLE_PAIRS];
+// ZEA: Zero electrical angle
+float zeaPositions[MOTOR_POLE_PAIRS + 2];
+float zeas[MOTOR_POLE_PAIRS + 2];
 
 void setRequestVoltage(float v) {
   lastMotorRequestVoltage = v;
@@ -39,7 +40,7 @@ float zeaByPosition() {
     float(currentRawAngle),
     zeaPositions,
     zeas,
-    MOTOR_POLE_PAIRS);
+    MOTOR_POLE_PAIRS + 2);
   return mapResult;
 }
 
@@ -125,14 +126,30 @@ void sensorLinearizer() {
   }
 
   // put sorted to global var
+  float ps[MOTOR_POLE_PAIRS];
+  float zs[MOTOR_POLE_PAIRS];
   for (int i = li; i < MOTOR_POLE_PAIRS; i++) {
-    zeaPositions[i - li] = float(p[i]);
-    zeas[i - li] = z[i];
+    ps[i - li] = float(p[i]);
+    zs[i - li] = z[i];
   }
   for (int i = 0; i < li; i++) {
-    zeaPositions[i + MOTOR_POLE_PAIRS - li] = float(p[i]);
-    zeas[i + MOTOR_POLE_PAIRS - li] = z[i];
+    ps[i + MOTOR_POLE_PAIRS - li] = float(p[i]);
+    zs[i + MOTOR_POLE_PAIRS - li] = z[i];
   }
+
+  // add last ZEA to the front so it's connecting to the first ZEA when rotating over the position
+  zeaPositions[0] = ps[MOTOR_POLE_PAIRS - 1] - SENSOR_PPR;
+  zeas[0] = zs[MOTOR_POLE_PAIRS - 1];
+
+  // moving sorted data to global variable
+  for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
+    zeaPositions[i + 1] = ps[i];
+    zeas[i + 1] = zs[i];
+  }
+
+  // add first ZEA to the end so it's connecting to the last ZEA when rotating over the position
+  zeaPositions[MOTOR_POLE_PAIRS + 1] = SENSOR_PPR + ps[0];
+  zeas[MOTOR_POLE_PAIRS + 1] = zs[0];
 
   if (isMotorDebug) {
     for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
@@ -143,7 +160,7 @@ void sensorLinearizer() {
 
     Serial.println("---");
 
-    for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
+    for (int i = 0; i < MOTOR_POLE_PAIRS + 2; i++) {
       Serial.print(zeaPositions[i]);
       Serial.print(":");
       Serial.println(zeas[i]);
