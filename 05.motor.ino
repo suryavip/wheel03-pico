@@ -103,8 +103,6 @@ void sensorLinearizer() {
     p[i] = currentRawAngle;
     z[i] = thisEa + .23;
 
-    if (i == MOTOR_POLE_PAIRS - 1) break;
-
     for (int j = 0; j < transition; j++) {
       elAngle = elAngle + (_2PI / transition);
       motor.setPhaseVoltage(MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT, 0, elAngle);
