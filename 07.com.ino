@@ -24,7 +24,7 @@ void parser(String& valRef) {
 }
 
 void comSetup() {
-  Serial.begin(115200);
+  Serial.begin();
   Serial.setTimeout(4);
 }
 
