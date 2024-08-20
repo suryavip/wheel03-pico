@@ -12,7 +12,7 @@ float zeaPositions[MOTOR_POLE_PAIRS + 2];
 float zeas[MOTOR_POLE_PAIRS + 2];
 
 void setRequestVoltage(float v) {
-  lastMotorRequestVoltage = v;
+  lastMotorRequestVoltage = v * motor.sensor_direction;
   lastMotorRequestMillis = millis();
 }
 
