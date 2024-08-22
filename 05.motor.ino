@@ -32,7 +32,7 @@ float zeaOffsetByVelo() {
   if (mapResult > .8) mapResult = .8;
   if (mapResult < -.8) mapResult = -.8;
 
-  return mapResult;
+  return mapResult * motor.sensor_direction;
 }
 
 float zeaByPosition() {
