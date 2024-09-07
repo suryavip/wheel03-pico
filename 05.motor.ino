@@ -1,6 +1,5 @@
-const unsigned int MOTOR_POLE_PAIRS = 15;
 const unsigned int MOTOR_VOLTAGE_LIMIT = 9;
-const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 2;
+const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 2.5;
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 
@@ -17,6 +16,7 @@ void setRequestVoltage(float v) {
 }
 
 float voltageMultiplierByVelo() {
+  return 1;
   float mapIn[] = { -21, 0, 21 };
   float mapOut[] = { 2, 1, 2 };
   float mapResult = multiMap<float>(lastVelo, mapIn, mapOut, 3);
@@ -25,6 +25,7 @@ float voltageMultiplierByVelo() {
 }
 
 float zeaOffsetByVelo() {
+  return 0;
   float mapIn[] = { -5, 0, 5 };
   float mapOut[] = { .8, 0, -.8 };
   float mapResult = multiMap<float>(lastVelo, mapIn, mapOut, 3);
@@ -79,7 +80,7 @@ void motorLoop() {
   }
 
   // Normal FOC routine.
-  motor.zero_electric_angle = zeaByPosition() + zeaOffsetByVelo();
+  // motor.zero_electric_angle = zeaByPosition() + zeaOffsetByVelo();
   motor.target = lastMotorRequestVoltage * voltageMultiplierByVelo();
 
   motor.loopFOC();
@@ -89,19 +90,23 @@ void motorLoop() {
 void sensorLinearizer() {
   float elAngle = _3PI_2;
   const int transition = 384;
-
-  int p[MOTOR_POLE_PAIRS];
-  float z[MOTOR_POLE_PAIRS];
+  int rp[MOTOR_POLE_PAIRS];
+  int cp[MOTOR_POLE_PAIRS];
+  int regulerDistance = SENSOR_PPR / MOTOR_POLE_PAIRS;
 
   for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
     motor.setPhaseVoltage(MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT, 0, elAngle);
     _delay(700);
 
     sensor.update();
-    motor.zero_electric_angle = 0;
-    float thisEa = motor.electricalAngle();
-    p[i] = currentRawAngle;
-    z[i] = thisEa + .23;
+    rp[i] = currentRawAngle;
+    if (i == 0) cp[i] = rp[i];
+    else {
+      int correctedPos = cp[i - 1] + (regulerDistance * motor.sensor_direction);
+      if (correctedPos < 0) correctedPos += SENSOR_PPR;
+      else if (correctedPos >= SENSOR_PPR) correctedPos -= SENSOR_PPR;
+      cp[i] = correctedPos;
+    }
 
     for (int j = 0; j < transition; j++) {
       elAngle = elAngle + (_2PI / transition);
@@ -113,55 +118,56 @@ void sensorLinearizer() {
 
   overRotation = 0;
 
-  // find the starting index
-  int l = SENSOR_PPR;
-  int li = 0;
-  for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
-    if (p[i] < l) {
-      l = p[i];
-      li = i;
-    }
+  if (motor.sensor_direction == -1) {
+    int rpArraySize = sizeof(rp) / sizeof(rp[0]);
+    reverseArray(rp, rpArraySize);
+    int cpArraySize = sizeof(cp) / sizeof(cp[0]);
+    reverseArray(cp, cpArraySize);
   }
 
-  // put sorted to global var
-  float ps[MOTOR_POLE_PAIRS];
-  float zs[MOTOR_POLE_PAIRS];
-  for (int i = li; i < MOTOR_POLE_PAIRS; i++) {
-    ps[i - li] = float(p[i]);
-    zs[i - li] = z[i];
-  }
-  for (int i = 0; i < li; i++) {
-    ps[i + MOTOR_POLE_PAIRS - li] = float(p[i]);
-    zs[i + MOTOR_POLE_PAIRS - li] = z[i];
-  }
+  int rpArraySize = sizeof(rp) / sizeof(rp[0]);
+  KickSort<int>::insertionSort(rp, rpArraySize);
+  int cpArraySize = sizeof(cp) / sizeof(cp[0]);
+  KickSort<int>::insertionSort(cp, cpArraySize);
 
-  // add last ZEA to the front so it's connecting to the first ZEA when rotating over the position
-  zeaPositions[0] = ps[MOTOR_POLE_PAIRS - 1] - SENSOR_PPR;
-  zeas[0] = zs[MOTOR_POLE_PAIRS - 1];
+  // add last position to the front so it's connecting to the first position when rotating over
+  rawPositions[0] = rp[MOTOR_POLE_PAIRS - 1] - SENSOR_PPR;
+  correctedPositions[0] = cp[MOTOR_POLE_PAIRS - 1] - SENSOR_PPR;
 
   // moving sorted data to global variable
   for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
-    zeaPositions[i + 1] = ps[i];
-    zeas[i + 1] = zs[i];
+    rawPositions[i + 1] = rp[i];
+    correctedPositions[i + 1] = cp[i];
   }
 
-  // add first ZEA to the end so it's connecting to the last ZEA when rotating over the position
-  zeaPositions[MOTOR_POLE_PAIRS + 1] = SENSOR_PPR + ps[0];
-  zeas[MOTOR_POLE_PAIRS + 1] = zs[0];
+  // add first position to the end so it's connecting to the last position when rotating over
+  rawPositions[MOTOR_POLE_PAIRS + 1] = SENSOR_PPR + rp[0];
+  correctedPositions[MOTOR_POLE_PAIRS + 1] = SENSOR_PPR + cp[0];
 
   if (isMotorDebug) {
     for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
-      Serial.print(p[i]);
+      Serial.print(rp[i]);
       Serial.print(":");
-      Serial.println(z[i]);
+      Serial.println(cp[i]);
     }
 
     Serial.println("---");
 
     for (int i = 0; i < MOTOR_POLE_PAIRS + 2; i++) {
-      Serial.print(zeaPositions[i]);
+      Serial.print(rawPositions[i]);
       Serial.print(":");
-      Serial.println(zeas[i]);
+      Serial.println(correctedPositions[i]);
     }
+  }
+
+  linearizationDone = true;
+}
+
+void reverseArray(int array[], int size) {
+  int temp;
+  for (int i = 0; i < size / 2; i++) {
+    temp = array[i];
+    array[i] = array[size - i - 1];
+    array[size - i - 1] = temp;
   }
 }

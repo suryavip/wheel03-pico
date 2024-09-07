@@ -1,3 +1,4 @@
+const unsigned int MOTOR_POLE_PAIRS = 15;
 const unsigned int SENSOR_PPR = 4096;
 const unsigned int SENSOR_MID_PPR = SENSOR_PPR / 2;
 const unsigned int SENSOR_MID_PPR_MIN_1 = SENSOR_MID_PPR - 1;
@@ -9,7 +10,13 @@ GenericSensor sensor;
 int currentRawAngle = -1;
 int overRotation = 0;
 
+// Sensor linearization
+bool linearizationDone = false;
+int rawPositions[MOTOR_POLE_PAIRS + 2];
+int correctedPositions[MOTOR_POLE_PAIRS + 2];
+
 // speed measurement
+LowPassFilter lastVeloFilter = LowPassFilter(1);
 int lastRawAngle = -1;
 int lastOverRotation = 0;
 unsigned int lastVeloMillis = 0;
@@ -17,6 +24,17 @@ double lastVelo = 0;
 
 float readMySensorCallback() {
   int newPosition = as5600.rawAngle();
+
+  if (linearizationDone) {
+    newPosition = multiMap<int>(
+      newPosition,
+      rawPositions,
+      correctedPositions,
+      MOTOR_POLE_PAIRS + 2);
+
+    if (newPosition < 0) newPosition += SENSOR_PPR;
+    else if (newPosition >= SENSOR_PPR) newPosition -= SENSOR_PPR;
+  }
 
   // Calculate over rotation.
   int distance = newPosition - currentRawAngle;
@@ -37,7 +55,7 @@ float readMySensorCallback() {
 
 void keepTrackVelocity() {
   int td = millis() - lastVeloMillis;
-  if (td < 2) return;
+  if (td < 10) return;
 
   if (lastRawAngle < 0) {
     // Initial recording
@@ -54,7 +72,7 @@ void keepTrackVelocity() {
   double rd = TWO_PI * pd;
   double v = rd / (double)td;  // rad/ms
   v *= 1000;                   // rad/s
-  lastVelo = v;
+  lastVelo = lastVeloFilter(v);
 
   lastRawAngle = currentRawAngle;
   lastOverRotation = overRotation;
