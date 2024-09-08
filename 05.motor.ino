@@ -1,5 +1,5 @@
 const unsigned int MOTOR_VOLTAGE_LIMIT = 9;
-const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 2.5;
+const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 2;
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 
@@ -59,8 +59,6 @@ void motorSetup() {
   motor.motion_downsample = 1;
 
   motor.init();
-  motor.initFOC();
-
   sensorLinearizer();
 }
 
@@ -91,8 +89,6 @@ void sensorLinearizer() {
   float elAngle = _3PI_2;
   const int transition = 384;
   int rp[MOTOR_POLE_PAIRS];
-  int cp[MOTOR_POLE_PAIRS];
-  int regulerDistance = SENSOR_PPR / MOTOR_POLE_PAIRS;
 
   for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
     motor.setPhaseVoltage(MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT, 0, elAngle);
@@ -100,13 +96,6 @@ void sensorLinearizer() {
 
     sensor.update();
     rp[i] = currentRawAngle;
-    if (i == 0) cp[i] = rp[i];
-    else {
-      int correctedPos = cp[i - 1] + (regulerDistance * motor.sensor_direction);
-      if (correctedPos < 0) correctedPos += SENSOR_PPR;
-      else if (correctedPos >= SENSOR_PPR) correctedPos -= SENSOR_PPR;
-      cp[i] = correctedPos;
-    }
 
     for (int j = 0; j < transition; j++) {
       elAngle = elAngle + (_2PI / transition);
@@ -121,14 +110,22 @@ void sensorLinearizer() {
   if (motor.sensor_direction == -1) {
     int rpArraySize = sizeof(rp) / sizeof(rp[0]);
     reverseArray(rp, rpArraySize);
-    int cpArraySize = sizeof(cp) / sizeof(cp[0]);
-    reverseArray(cp, cpArraySize);
   }
 
   int rpArraySize = sizeof(rp) / sizeof(rp[0]);
   KickSort<int>::insertionSort(rp, rpArraySize);
-  int cpArraySize = sizeof(cp) / sizeof(cp[0]);
-  KickSort<int>::insertionSort(cp, cpArraySize);
+
+  int cp[MOTOR_POLE_PAIRS];
+  int regulerDistance = SENSOR_PPR / MOTOR_POLE_PAIRS;
+  for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
+    if (i == 0) cp[i] = rp[i];
+    else {
+      int correctedPos = cp[i - 1] + regulerDistance;
+      if (correctedPos < 0) correctedPos += SENSOR_PPR;
+      else if (correctedPos >= SENSOR_PPR) correctedPos -= SENSOR_PPR;
+      cp[i] = correctedPos;
+    }
+  }
 
   // add last position to the front so it's connecting to the first position when rotating over
   rawPositions[0] = rp[MOTOR_POLE_PAIRS - 1] - SENSOR_PPR;
@@ -144,23 +141,27 @@ void sensorLinearizer() {
   rawPositions[MOTOR_POLE_PAIRS + 1] = SENSOR_PPR + rp[0];
   correctedPositions[MOTOR_POLE_PAIRS + 1] = SENSOR_PPR + cp[0];
 
-  if (isMotorDebug) {
-    for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
-      Serial.print(rp[i]);
-      Serial.print(":");
-      Serial.println(cp[i]);
-    }
+  for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
+    Serial.print(rp[i]);
+    Serial.print(":");
+    Serial.println(cp[i]);
+  }
 
-    Serial.println("---");
+  Serial.println("---");
 
-    for (int i = 0; i < MOTOR_POLE_PAIRS + 2; i++) {
-      Serial.print(rawPositions[i]);
-      Serial.print(":");
-      Serial.println(correctedPositions[i]);
-    }
+  for (int i = 0; i < MOTOR_POLE_PAIRS + 2; i++) {
+    Serial.print(rawPositions[i]);
+    Serial.print(":");
+    Serial.println(correctedPositions[i]);
   }
 
   linearizationDone = true;
+
+  motor.initFOC();
+
+  Serial.println(motor.zero_electric_angle);
+  motor.zero_electric_angle += ((float)rawPositions[1] / (float)SENSOR_PPR) * _2PI;
+  Serial.println(motor.zero_electric_angle);
 }
 
 void reverseArray(int array[], int size) {

@@ -90,5 +90,5 @@ void sensorSetup() {
 }
 
 void sensorLoop() {
-  keepTrackVelocity();
+  // keepTrackVelocity();
 }
