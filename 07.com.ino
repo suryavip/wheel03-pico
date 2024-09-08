@@ -2,7 +2,7 @@ void replyWithPositions() {
   String separator = ",";
   String delimiter = ";";
 
-  String output = currentRawAngle + separator + overRotation;
+  String output = int(currentRawAngle) + separator + overRotation;
   output += separator + accValue;
   output += separator + brkValue;
   output += separator + cltValue;

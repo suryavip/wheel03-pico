@@ -1,3 +1,4 @@
+const unsigned int MOTOR_POLE_PAIRS = 15;
 const unsigned int MOTOR_VOLTAGE_LIMIT = 9;
 const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 2;
 
@@ -7,6 +8,7 @@ unsigned int lastMotorRequestMillis = 0;
 float lastMotorRequestVoltage = 0;
 
 // ZEA: Zero electrical angle
+float zea;
 float zeaPositions[MOTOR_POLE_PAIRS + 2];
 float zeas[MOTOR_POLE_PAIRS + 2];
 
@@ -37,6 +39,7 @@ float zeaOffsetByVelo() {
 }
 
 float zeaByPosition() {
+  return zea;
   float mapResult = multiMap<float>(
     float(currentRawAngle),
     zeaPositions,
@@ -60,6 +63,9 @@ void motorSetup() {
 
   motor.init();
   sensorLinearizer();
+  motor.initFOC();
+
+  zea = motor.zero_electric_angle + .23;
 }
 
 void motorLoop() {
@@ -78,18 +84,20 @@ void motorLoop() {
   }
 
   // Normal FOC routine.
-  // motor.zero_electric_angle = zeaByPosition() + zeaOffsetByVelo();
+  motor.zero_electric_angle = zeaByPosition() + zeaOffsetByVelo();
   motor.target = lastMotorRequestVoltage * voltageMultiplierByVelo();
 
   motor.loopFOC();
   motor.move();
 }
 
+// call this after motor.init() and before motor.initFOC()
 void sensorLinearizer() {
   float elAngle = _3PI_2;
   const int transition = 384;
-  int rp[MOTOR_POLE_PAIRS];
+  float rp[MOTOR_POLE_PAIRS];
 
+  // collect raw positions for each home pole pair
   for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
     motor.setPhaseVoltage(MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT, 0, elAngle);
     _delay(700);
@@ -105,67 +113,58 @@ void sensorLinearizer() {
     }
   }
 
-  overRotation = 0;
-
+  // sort raw positions, ascending
   if (motor.sensor_direction == -1) {
     int rpArraySize = sizeof(rp) / sizeof(rp[0]);
     reverseArray(rp, rpArraySize);
   }
-
   int rpArraySize = sizeof(rp) / sizeof(rp[0]);
-  KickSort<int>::insertionSort(rp, rpArraySize);
+  KickSort<float>::insertionSort(rp, rpArraySize);
 
-  int cp[MOTOR_POLE_PAIRS];
-  int regulerDistance = SENSOR_PPR / MOTOR_POLE_PAIRS;
+  // calculating the corrected positions
+  float cp[MOTOR_POLE_PAIRS];
+  float regulerDistance = float(SENSOR_PPR) / float(MOTOR_POLE_PAIRS);
   for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
     if (i == 0) cp[i] = rp[i];
     else {
-      int correctedPos = cp[i - 1] + regulerDistance;
-      if (correctedPos < 0) correctedPos += SENSOR_PPR;
-      else if (correctedPos >= SENSOR_PPR) correctedPos -= SENSOR_PPR;
+      float correctedPos = cp[i - 1] + regulerDistance;
+      if (correctedPos < 0) correctedPos += float(SENSOR_PPR);
+      else if (correctedPos >= float(SENSOR_PPR)) correctedPos -= float(SENSOR_PPR);
       cp[i] = correctedPos;
     }
   }
 
-  // add last position to the front so it's connecting to the first position when rotating over
-  rawPositions[0] = rp[MOTOR_POLE_PAIRS - 1] - SENSOR_PPR;
-  correctedPositions[0] = cp[MOTOR_POLE_PAIRS - 1] - SENSOR_PPR;
+  float rp2[MOTOR_POLE_PAIRS + 2];
+  float cp2[MOTOR_POLE_PAIRS + 2];
 
-  // moving sorted data to global variable
+  // add last position to the front so it's connecting to the first position when rotating over
+  rp2[0] = rp[MOTOR_POLE_PAIRS - 1] - float(SENSOR_PPR);
+  cp2[0] = cp[MOTOR_POLE_PAIRS - 1] - float(SENSOR_PPR);
+
+  // copy existing data
   for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
-    rawPositions[i + 1] = rp[i];
-    correctedPositions[i + 1] = cp[i];
+    rp2[i + 1] = rp[i];
+    cp2[i + 1] = cp[i];
   }
 
   // add first position to the end so it's connecting to the last position when rotating over
-  rawPositions[MOTOR_POLE_PAIRS + 1] = SENSOR_PPR + rp[0];
-  correctedPositions[MOTOR_POLE_PAIRS + 1] = SENSOR_PPR + cp[0];
+  rp2[MOTOR_POLE_PAIRS + 1] = float(SENSOR_PPR) + rp[0];
+  cp2[MOTOR_POLE_PAIRS + 1] = float(SENSOR_PPR) + cp[0];
 
-  for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
-    Serial.print(rp[i]);
-    Serial.print(":");
-    Serial.println(cp[i]);
+  // map all the possible positions
+  for (int i = 0; i < SENSOR_PPR; i++) {
+    float p = multiMap<float>(i, rp2, cp2, MOTOR_POLE_PAIRS + 2);
+    if (p < 0) p += float(SENSOR_PPR);
+    else if (p >= float(SENSOR_PPR)) p -= float(SENSOR_PPR);
+    linearized[i] = p;
   }
 
-  Serial.println("---");
-
-  for (int i = 0; i < MOTOR_POLE_PAIRS + 2; i++) {
-    Serial.print(rawPositions[i]);
-    Serial.print(":");
-    Serial.println(correctedPositions[i]);
-  }
-
+  overRotation = 0;
   linearizationDone = true;
-
-  motor.initFOC();
-
-  Serial.println(motor.zero_electric_angle);
-  motor.zero_electric_angle += ((float)rawPositions[1] / (float)SENSOR_PPR) * _2PI;
-  Serial.println(motor.zero_electric_angle);
 }
 
-void reverseArray(int array[], int size) {
-  int temp;
+void reverseArray(float array[], int size) {
+  float temp;
   for (int i = 0; i < size / 2; i++) {
     temp = array[i];
     array[i] = array[size - i - 1];

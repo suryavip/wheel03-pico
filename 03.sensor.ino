@@ -1,4 +1,3 @@
-const unsigned int MOTOR_POLE_PAIRS = 15;
 const unsigned int SENSOR_PPR = 4096;
 const unsigned int SENSOR_MID_PPR = SENSOR_PPR / 2;
 const unsigned int SENSOR_MID_PPR_MIN_1 = SENSOR_MID_PPR - 1;
@@ -7,49 +6,38 @@ const unsigned int SENSOR_I2C_CLOCK = 400 * 1000;
 AS5600 as5600;
 GenericSensor sensor;
 
-int currentRawAngle = -1;
+float currentRawAngle = -1;
 int overRotation = 0;
 
 // Sensor linearization
+float linearized[SENSOR_PPR];
 bool linearizationDone = false;
-int rawPositions[MOTOR_POLE_PAIRS + 2];
-int correctedPositions[MOTOR_POLE_PAIRS + 2];
 
 // speed measurement
-LowPassFilter lastVeloFilter = LowPassFilter(1);
-int lastRawAngle = -1;
+LowPassFilter lastVeloFilter = LowPassFilter(.1);
+float lastRawAngle = -1;
 int lastOverRotation = 0;
 unsigned int lastVeloMillis = 0;
-double lastVelo = 0;
+float lastVelo = 0;
 
 float readMySensorCallback() {
-  int newPosition = as5600.rawAngle();
+  float newPosition = float(as5600.rawAngle());
 
   if (linearizationDone) {
-    newPosition = multiMap<int>(
-      newPosition,
-      rawPositions,
-      correctedPositions,
-      MOTOR_POLE_PAIRS + 2);
-
-    if (newPosition < 0) newPosition += SENSOR_PPR;
-    else if (newPosition >= SENSOR_PPR) newPosition -= SENSOR_PPR;
+    newPosition = linearized[int(newPosition)];
   }
 
   // Calculate over rotation.
-  int distance = newPosition - currentRawAngle;
-  if (abs(distance) > SENSOR_MID_PPR_MIN_1) {
+  float distance = newPosition - currentRawAngle;
+  if (abs(distance) > float(SENSOR_MID_PPR_MIN_1)) {
     if (currentRawAngle > -1) {
-      if (newPosition < SENSOR_MID_PPR) overRotation++;
+      if (newPosition < float(SENSOR_MID_PPR)) overRotation++;
       else overRotation--;
     }
   }
 
   currentRawAngle = newPosition;
-
-  double rawAngleInDouble = currentRawAngle;
-  double percent = rawAngleInDouble / SENSOR_PPR;
-
+  float percent = currentRawAngle / SENSOR_PPR;
   return TWO_PI * percent;
 }
 
@@ -65,12 +53,12 @@ void keepTrackVelocity() {
     return;
   }
 
-  int c = currentRawAngle + (SENSOR_PPR * overRotation);
-  int l = lastRawAngle + (SENSOR_PPR * lastOverRotation);
-  double d = c - l;
-  double pd = d / SENSOR_PPR;
-  double rd = TWO_PI * pd;
-  double v = rd / (double)td;  // rad/ms
+  float c = currentRawAngle + float(SENSOR_PPR * overRotation);
+  float l = lastRawAngle + float(SENSOR_PPR * lastOverRotation);
+  float d = c - l;
+  float pd = d / SENSOR_PPR;
+  float rd = TWO_PI * pd;
+  float v = rd / float(td);  // rad/ms
   v *= 1000;                   // rad/s
   lastVelo = lastVeloFilter(v);
 
@@ -90,5 +78,5 @@ void sensorSetup() {
 }
 
 void sensorLoop() {
-  // keepTrackVelocity();
+  keepTrackVelocity();
 }
