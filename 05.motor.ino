@@ -8,9 +8,7 @@ unsigned int lastMotorRequestMillis = 0;
 float lastMotorRequestVoltage = 0;
 
 // ZEA: Zero electrical angle
-float zea;
-float zeaPositions[MOTOR_POLE_PAIRS + 2];
-float zeas[MOTOR_POLE_PAIRS + 2];
+float zea = 4.60;
 
 void setRequestVoltage(float v) {
   lastMotorRequestVoltage = v * motor.sensor_direction;
@@ -27,7 +25,6 @@ float voltageMultiplierByVelo() {
 }
 
 float zeaOffsetByVelo() {
-  return 0;
   float mapIn[] = { -5, 0, 5 };
   float mapOut[] = { .8, 0, -.8 };
   float mapResult = multiMap<float>(lastVelo, mapIn, mapOut, 3);
@@ -36,16 +33,6 @@ float zeaOffsetByVelo() {
   if (mapResult < -.8) mapResult = -.8;
 
   return mapResult * motor.sensor_direction;
-}
-
-float zeaByPosition() {
-  return zea;
-  float mapResult = multiMap<float>(
-    float(currentRawAngle),
-    zeaPositions,
-    zeas,
-    MOTOR_POLE_PAIRS + 2);
-  return mapResult;
 }
 
 void motorSetup() {
@@ -64,8 +51,6 @@ void motorSetup() {
   motor.init();
   sensorLinearizer();
   motor.initFOC();
-
-  zea = motor.zero_electric_angle + .23;
 }
 
 void motorLoop() {
@@ -84,7 +69,7 @@ void motorLoop() {
   }
 
   // Normal FOC routine.
-  motor.zero_electric_angle = zeaByPosition() + zeaOffsetByVelo();
+  motor.zero_electric_angle = zea + zeaOffsetByVelo();
   motor.target = lastMotorRequestVoltage * voltageMultiplierByVelo();
 
   motor.loopFOC();
@@ -154,9 +139,15 @@ void sensorLinearizer() {
   // map all the possible positions
   for (int i = 0; i < SENSOR_PPR; i++) {
     float p = multiMap<float>(i, rp2, cp2, MOTOR_POLE_PAIRS + 2);
+    p = round(p);
     if (p < 0) p += float(SENSOR_PPR);
     else if (p >= float(SENSOR_PPR)) p -= float(SENSOR_PPR);
     linearized[i] = p;
+
+    Serial.print("A:");
+    Serial.print(i);
+    Serial.print(",B:");
+    Serial.println(p);
   }
 
   overRotation = 0;
