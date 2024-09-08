@@ -1,6 +1,6 @@
 const unsigned int MOTOR_POLE_PAIRS = 15;
 const unsigned int MOTOR_VOLTAGE_LIMIT = 9;
-const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 2;
+const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 3;
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 
@@ -8,15 +8,14 @@ unsigned int lastMotorRequestMillis = 0;
 float lastMotorRequestVoltage = 0;
 
 // ZEA: Zero electrical angle
-float zea = 4.60;
+float zea;
 
 void setRequestVoltage(float v) {
-  lastMotorRequestVoltage = v * motor.sensor_direction;
+  lastMotorRequestVoltage = v;
   lastMotorRequestMillis = millis();
 }
 
 float voltageMultiplierByVelo() {
-  return 1;
   float mapIn[] = { -21, 0, 21 };
   float mapOut[] = { 2, 1, 2 };
   float mapResult = multiMap<float>(lastVelo, mapIn, mapOut, 3);
@@ -51,6 +50,7 @@ void motorSetup() {
   motor.init();
   sensorLinearizer();
   motor.initFOC();
+  zea = motor.zero_electric_angle;
 }
 
 void motorLoop() {
@@ -79,7 +79,7 @@ void motorLoop() {
 // call this after motor.init() and before motor.initFOC()
 void sensorLinearizer() {
   float elAngle = _3PI_2;
-  const int transition = 384;
+  const int transition = 500;
   float rp[MOTOR_POLE_PAIRS];
 
   // collect raw positions for each home pole pair
@@ -99,10 +99,6 @@ void sensorLinearizer() {
   }
 
   // sort raw positions, ascending
-  if (motor.sensor_direction == -1) {
-    int rpArraySize = sizeof(rp) / sizeof(rp[0]);
-    reverseArray(rp, rpArraySize);
-  }
   int rpArraySize = sizeof(rp) / sizeof(rp[0]);
   KickSort<float>::insertionSort(rp, rpArraySize);
 
@@ -143,22 +139,8 @@ void sensorLinearizer() {
     if (p < 0) p += float(SENSOR_PPR);
     else if (p >= float(SENSOR_PPR)) p -= float(SENSOR_PPR);
     linearized[i] = p;
-
-    Serial.print("A:");
-    Serial.print(i);
-    Serial.print(",B:");
-    Serial.println(p);
   }
 
   overRotation = 0;
   linearizationDone = true;
-}
-
-void reverseArray(float array[], int size) {
-  float temp;
-  for (int i = 0; i < size / 2; i++) {
-    temp = array[i];
-    array[i] = array[size - i - 1];
-    array[size - i - 1] = temp;
-  }
 }

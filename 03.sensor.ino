@@ -14,7 +14,6 @@ float linearized[SENSOR_PPR];
 bool linearizationDone = false;
 
 // speed measurement
-LowPassFilter lastVeloFilter = LowPassFilter(.1);
 float lastRawAngle = -1;
 int lastOverRotation = 0;
 unsigned int lastVeloMillis = 0;
@@ -53,14 +52,14 @@ void keepTrackVelocity() {
     return;
   }
 
-  float c = currentRawAngle + float(SENSOR_PPR * overRotation);
-  float l = lastRawAngle + float(SENSOR_PPR * lastOverRotation);
+  float c = currentRawAngle + (float(SENSOR_PPR) * float(overRotation));
+  float l = lastRawAngle + (float(SENSOR_PPR) * float(lastOverRotation));
   float d = c - l;
-  float pd = d / SENSOR_PPR;
+  float pd = d / float(SENSOR_PPR);
   float rd = TWO_PI * pd;
   float v = rd / float(td);  // rad/ms
-  v *= 1000;                   // rad/s
-  lastVelo = lastVeloFilter(v);
+  v *= 1000;                 // rad/s
+  lastVelo = v;
 
   lastRawAngle = currentRawAngle;
   lastOverRotation = overRotation;
