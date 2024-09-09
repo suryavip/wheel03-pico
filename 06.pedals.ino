@@ -25,13 +25,4 @@ void pedalsLoop() {
   if (loadCell.is_ready()) {
     brkValue = (loadCell.read() - 80000) / 64;
   }
-
-  if (isPedalsDebug) {
-    Serial.print("A:");
-    Serial.print(accValue);
-    Serial.print(",B:");
-    Serial.print(brkValue);
-    Serial.print(",C:");
-    Serial.println(cltValue);
-  }
 }

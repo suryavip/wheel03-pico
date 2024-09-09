@@ -88,7 +88,7 @@ void sensorLinearizer() {
     _delay(700);
 
     sensor.update();
-    rp[i] = currentRawAngle;
+    rp[i] = currentRawPosition;
 
     for (int j = 0; j < transition; j++) {
       elAngle = elAngle + (_2PI / transition);

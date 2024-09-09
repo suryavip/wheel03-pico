@@ -6,7 +6,7 @@ const unsigned int SENSOR_I2C_CLOCK = 400 * 1000;
 AS5600 as5600;
 GenericSensor sensor;
 
-float currentRawAngle = -1;
+float currentRawPosition = -1;
 int overRotation = 0;
 
 // Sensor linearization
@@ -14,7 +14,7 @@ float linearized[SENSOR_PPR];
 bool linearizationDone = false;
 
 // speed measurement
-float lastRawAngle = -1;
+float lastRawPosition = -1;
 int lastOverRotation = 0;
 unsigned int lastVeloMillis = 0;
 float lastVelo = 0;
@@ -27,16 +27,16 @@ float readMySensorCallback() {
   }
 
   // Calculate over rotation.
-  float distance = newPosition - currentRawAngle;
+  float distance = newPosition - currentRawPosition;
   if (abs(distance) > float(SENSOR_MID_PPR_MIN_1)) {
-    if (currentRawAngle > -1) {
+    if (currentRawPosition > -1) {
       if (newPosition < float(SENSOR_MID_PPR)) overRotation++;
       else overRotation--;
     }
   }
 
-  currentRawAngle = newPosition;
-  float percent = currentRawAngle / SENSOR_PPR;
+  currentRawPosition = newPosition;
+  float percent = currentRawPosition / SENSOR_PPR;
   return TWO_PI * percent;
 }
 
@@ -44,16 +44,16 @@ void keepTrackVelocity() {
   int td = millis() - lastVeloMillis;
   if (td < 10) return;
 
-  if (lastRawAngle < 0) {
+  if (lastRawPosition < 0) {
     // Initial recording
-    lastRawAngle = currentRawAngle;
+    lastRawPosition = currentRawPosition;
     lastOverRotation = overRotation;
     lastVeloMillis = millis();
     return;
   }
 
-  float c = currentRawAngle + (float(SENSOR_PPR) * float(overRotation));
-  float l = lastRawAngle + (float(SENSOR_PPR) * float(lastOverRotation));
+  float c = currentRawPosition + (float(SENSOR_PPR) * float(overRotation));
+  float l = lastRawPosition + (float(SENSOR_PPR) * float(lastOverRotation));
   float d = c - l;
   float pd = d / float(SENSOR_PPR);
   float rd = TWO_PI * pd;
@@ -61,7 +61,7 @@ void keepTrackVelocity() {
   v *= 1000;                 // rad/s
   lastVelo = v;
 
-  lastRawAngle = currentRawAngle;
+  lastRawPosition = currentRawPosition;
   lastOverRotation = overRotation;
   lastVeloMillis = millis();
 }
