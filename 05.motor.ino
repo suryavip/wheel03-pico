@@ -88,7 +88,7 @@ void sensorLinearizer() {
     _delay(700);
 
     sensor.update();
-    rp[i] = currentRawPosition;
+    rp[i] = float(currentRawPosition);
 
     for (int j = 0; j < transition; j++) {
       elAngle = elAngle + (_2PI / transition);
@@ -134,10 +134,10 @@ void sensorLinearizer() {
 
   // map all the possible positions
   for (int i = 0; i < SENSOR_PPR; i++) {
-    float p = multiMap<float>(i, rp2, cp2, MOTOR_POLE_PAIRS + 2);
-    p = round(p);
-    if (p < 0) p += float(SENSOR_PPR);
-    else if (p >= float(SENSOR_PPR)) p -= float(SENSOR_PPR);
+    float pf = multiMap<float>(i, rp2, cp2, MOTOR_POLE_PAIRS + 2);
+    int p = int(round(pf));
+    if (p < 0) p += SENSOR_PPR;
+    else if (p >= SENSOR_PPR) p -= SENSOR_PPR;
     linearized[i] = p;
   }
 

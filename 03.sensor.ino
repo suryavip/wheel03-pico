@@ -6,37 +6,37 @@ const unsigned int SENSOR_I2C_CLOCK = 400 * 1000;
 AS5600 as5600;
 GenericSensor sensor;
 
-float currentRawPosition = -1;
+int currentRawPosition = -1;
 int overRotation = 0;
 
 // Sensor linearization
-float linearized[SENSOR_PPR];
+int linearized[SENSOR_PPR];
 bool linearizationDone = false;
 
 // speed measurement
-float lastRawPosition = -1;
+int lastRawPosition = -1;
 int lastOverRotation = 0;
 unsigned int lastVeloMillis = 0;
 float lastVelo = 0;
 
 float readMySensorCallback() {
-  float newPosition = float(as5600.rawAngle());
+  int newPosition = as5600.rawAngle();
 
   if (linearizationDone) {
-    newPosition = linearized[int(newPosition)];
+    newPosition = linearized[newPosition];
   }
 
   // Calculate over rotation.
-  float distance = newPosition - currentRawPosition;
-  if (abs(distance) > float(SENSOR_MID_PPR_MIN_1)) {
+  int distance = newPosition - currentRawPosition;
+  if (abs(distance) > SENSOR_MID_PPR_MIN_1) {
     if (currentRawPosition > -1) {
-      if (newPosition < float(SENSOR_MID_PPR)) overRotation++;
+      if (newPosition < SENSOR_MID_PPR) overRotation++;
       else overRotation--;
     }
   }
 
   currentRawPosition = newPosition;
-  float percent = currentRawPosition / SENSOR_PPR;
+  float percent = float(currentRawPosition) / float(SENSOR_PPR);
   return TWO_PI * percent;
 }
 
@@ -52,10 +52,10 @@ void keepTrackVelocity() {
     return;
   }
 
-  float c = currentRawPosition + (float(SENSOR_PPR) * float(overRotation));
-  float l = lastRawPosition + (float(SENSOR_PPR) * float(lastOverRotation));
-  float d = c - l;
-  float pd = d / float(SENSOR_PPR);
+  int c = currentRawPosition + (SENSOR_PPR * overRotation);
+  int l = lastRawPosition + (SENSOR_PPR * lastOverRotation);
+  int d = c - l;
+  float pd = float(d) / float(SENSOR_PPR);
   float rd = TWO_PI * pd;
   float v = rd / float(td);  // rad/ms
   v *= 1000;                 // rad/s
