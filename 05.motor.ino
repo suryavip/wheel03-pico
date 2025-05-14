@@ -7,9 +7,6 @@ BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 unsigned int lastMotorRequestMillis = 0;
 float lastMotorRequestVoltage = 0;
 
-// ZEA: Zero electrical angle
-float zea;
-
 void setRequestVoltage(float v) {
   lastMotorRequestVoltage = v;
   lastMotorRequestMillis = millis();
@@ -21,17 +18,6 @@ float voltageMultiplierByVelo() {
   float mapResult = multiMap<float>(lastVelo, mapIn, mapOut, 3);
 
   return mapResult;
-}
-
-float zeaOffsetByVelo() {
-  float mapIn[] = { -5, 0, 5 };
-  float mapOut[] = { .8, 0, -.8 };
-  float mapResult = multiMap<float>(lastVelo, mapIn, mapOut, 3);
-
-  if (mapResult > .8) mapResult = .8;
-  if (mapResult < -.8) mapResult = -.8;
-
-  return mapResult * motor.sensor_direction;
 }
 
 void motorSetup() {
@@ -50,7 +36,6 @@ void motorSetup() {
   motor.init();
   sensorLinearizer();
   motor.initFOC();
-  zea = motor.zero_electric_angle;
 }
 
 void motorLoop() {
@@ -69,7 +54,6 @@ void motorLoop() {
   }
 
   // Normal FOC routine.
-  motor.zero_electric_angle = zea + zeaOffsetByVelo();
   motor.target = lastMotorRequestVoltage * voltageMultiplierByVelo();
 
   motor.loopFOC();
