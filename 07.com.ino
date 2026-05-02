@@ -13,9 +13,12 @@ void replyWithPositions() {
 void parser(String& valRef) {
   String val = "";
 
+  if (Serial.available() < 1) return;
   char read = Serial.read();
+
   while (read != ';') {
     val += read;
+
     if (Serial.available() < 1) return;
     read = Serial.read();
   }
@@ -25,7 +28,6 @@ void parser(String& valRef) {
 
 void comSetup() {
   Serial.begin();
-  Serial.setTimeout(4);
 }
 
 void comLoop() {

@@ -1,6 +1,6 @@
 const unsigned int MOTOR_POLE_PAIRS = 15;
 const unsigned int MOTOR_VOLTAGE_LIMIT = 9;
-const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 3;
+const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 4;
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 
@@ -31,7 +31,9 @@ void motorSetup() {
   motor.controller = MotionControlType::torque;
   motor.torque_controller = TorqueControlType::voltage;
   motor.foc_modulation = FOCModulationType::SinePWM;
-  // motor.motion_downsample = 1;
+  motor.motion_downsample = 1;
+  // motor.zero_electric_angle = 4.42;
+  // motor.sensor_direction = Direction::CCW;
 
   motor.init();
   sensorLinearizer();
@@ -42,6 +44,7 @@ void motorLoop() {
   // If motor disabled, just update the sensor value
   // to make the steering wheel still usable without force feedback.
   if (motor.enabled == false) {
+    linearizationDone = false;
     sensor.update();
     return;
   }
