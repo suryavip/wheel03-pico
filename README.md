@@ -9,6 +9,7 @@
 ## DIY Force Feedback Steering Wheel
 Code name: `wheel03-pico`
 
+My Setup:
 - Microcontroller: Raspberry Pi Pico
 - Motor: Hoverboard motor
 - Motor driver: 2x IBT-2 module
