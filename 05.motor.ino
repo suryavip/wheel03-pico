@@ -2,10 +2,21 @@ const unsigned int MOTOR_POLE_PAIRS = 15;
 const unsigned int MOTOR_VOLTAGE_LIMIT = 9;
 const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 3;
 
+// Resistance layer: simulates the wheel's own mechanical feel, so it doesn't
+// feel free-spinning when the game sends no force. It is added on top of the
+// requested voltage and always opposes the direction of motion.
+const float RESISTANCE_DAMPING = 0.05;       // V per rad/s, grows with speed
+const float RESISTANCE_FRICTION = 0.3;       // V, constant drag while moving
+const float RESISTANCE_FRICTION_FADE = 2.0;  // rad/s, speed at which friction is fully applied
+const float RESISTANCE_VELO_TAU = 0.01;      // s, low-pass time constant of the velocity
+
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 
 unsigned int lastMotorRequestMillis = 0;
 float lastMotorRequestVoltage = 0;
+
+float resistanceVelo = 0;
+unsigned long lastResistanceMicros = 0;
 
 void setRequestVoltage(float v) {
   lastMotorRequestVoltage = v;
@@ -18,6 +29,25 @@ float voltageMultiplierByVelo() {
   float mapResult = multiMap<float>(lastVelo, mapIn, mapOut, 3);
 
   return mapResult;
+}
+
+float resistanceVoltage() {
+  // lastVelo is quantized by the sensor resolution, so smooth it first.
+  unsigned long now = micros();
+  float dt = float(now - lastResistanceMicros) * 1e-6f;
+  lastResistanceMicros = now;
+  resistanceVelo += (dt / (RESISTANCE_VELO_TAU + dt)) * (lastVelo - resistanceVelo);
+
+  float damping = -RESISTANCE_DAMPING * resistanceVelo;
+
+  // Ramp friction in with speed rather than using sign(), which would buzz
+  // around standstill.
+  float ramp = resistanceVelo / RESISTANCE_FRICTION_FADE;
+  if (ramp > 1) ramp = 1;
+  else if (ramp < -1) ramp = -1;
+  float friction = -RESISTANCE_FRICTION * ramp;
+
+  return damping + friction;
 }
 
 void motorSetup() {
@@ -57,7 +87,11 @@ void motorLoop() {
   }
 
   // Normal FOC routine.
-  motor.target = lastMotorRequestVoltage;// * voltageMultiplierByVelo();
+  float target = lastMotorRequestVoltage + resistanceVoltage();
+  const float limit = float(MOTOR_VOLTAGE_LIMIT);
+  if (target > limit) target = limit;
+  else if (target < -limit) target = -limit;
+  motor.target = target;
 
   motor.loopFOC();
   motor.move();
