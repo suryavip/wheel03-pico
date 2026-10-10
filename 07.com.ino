@@ -1,29 +1,47 @@
-void replyWithPositions() {
-  String separator = ",";
-  String delimiter = ";";
+const uint8_t COM_FRAME_MAX = 16;
 
-  String output = int(currentRawPosition) + separator + overRotation;
-  output += separator + accValue;
-  output += separator + brkValue;
-  output += separator + cltValue;
-  output += delimiter;
-  Serial.print(output);
+// Receive accumulator. Kept across calls so a frame split over several reads
+// isn't lost.
+char comBuf[COM_FRAME_MAX];
+uint8_t comLen = 0;
+bool comOverflow = false;
+
+void replyWithPositions() {
+  char out[48];
+  int n = snprintf(out, sizeof(out), "%d,%d,%d,%d,%d;",
+                   int(currentRawPosition), overRotation, accValue, brkValue, cltValue);
+  if (n <= 0) return;
+  if (n >= (int)sizeof(out)) n = sizeof(out) - 1;
+
+  // single write, so it goes out as one USB packet
+  Serial.write((const uint8_t*)out, n);
 }
 
-void parser(String& valRef) {
-  String val = "";
+// Drains everything currently waiting on the serial port.
+// Returns true if at least one complete frame arrived, with the newest
+// frame's value in `out`.
+bool readLatestVoltage(float& out) {
+  bool got = false;
 
-  if (Serial.available() < 1) return;
-  char read = Serial.read();
+  while (Serial.available() > 0) {
+    char c = Serial.read();
 
-  while (read != ';') {
-    val += read;
-
-    if (Serial.available() < 1) return;
-    read = Serial.read();
+    if (c == ';') {
+      if (!comOverflow && comLen > 0) {
+        comBuf[comLen] = '\0';
+        out = atof(comBuf);
+        got = true;
+      }
+      comLen = 0;
+      comOverflow = false;
+    } else if (comLen < COM_FRAME_MAX - 1) {
+      comBuf[comLen++] = c;
+    } else {
+      comOverflow = true;
+    }
   }
 
-  valRef = val;
+  return got;
 }
 
 void comSetup() {
@@ -31,12 +49,11 @@ void comSetup() {
 }
 
 void comLoop() {
-  String val = "";
-  parser(val);
+  float v = 0;
+  if (!readLatestVoltage(v)) return;
 
-  if (val != "") {
-    replyWithPositions();
-    float v = val.toFloat();
-    setRequestVoltage(v);
-  }
+  // Reply once per batch: the PC sends exactly one command per reply, so
+  // answering every queued frame would put extra frames in flight.
+  replyWithPositions();
+  setRequestVoltage(v);
 }
