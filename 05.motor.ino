@@ -57,7 +57,7 @@ void motorLoop() {
   }
 
   // Normal FOC routine.
-  motor.target = lastMotorRequestVoltage * voltageMultiplierByVelo();
+  motor.target = lastMotorRequestVoltage;// * voltageMultiplierByVelo();
 
   motor.loopFOC();
   motor.move();
