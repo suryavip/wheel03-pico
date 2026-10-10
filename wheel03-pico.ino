@@ -1,4 +1,4 @@
-// https://github.com/earlephilhower/arduino-pico @5.6.0
+// https://github.com/earlephilhower/arduino-pico @6.0.0
 
 #include <SimpleFOC.h>  // https://github.com/simplefoc @2.4.0
 #include <AS5600.h>     // https://github.com/RobTillaart/AS5600 @0.6.7
