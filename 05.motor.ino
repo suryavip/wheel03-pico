@@ -1,6 +1,6 @@
 const unsigned int MOTOR_POLE_PAIRS = 15;
 const unsigned int MOTOR_VOLTAGE_LIMIT = 9;
-const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 4;
+const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 3;
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 
@@ -30,7 +30,7 @@ void motorSetup() {
   motor.velocity_limit = 60;
   motor.controller = MotionControlType::torque;
   motor.torque_controller = TorqueControlType::voltage;
-  motor.foc_modulation = FOCModulationType::SinePWM;
+  motor.foc_modulation = FOCModulationType::SpaceVectorPWM;
   motor.motion_downsample = 1;
   // motor.zero_electric_angle = 4.42;
   // motor.sensor_direction = Direction::CCW;
