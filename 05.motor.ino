@@ -72,7 +72,8 @@ void sensorLinearizer() {
   // collect raw positions for each home pole pair
   for (int i = 0; i < MOTOR_POLE_PAIRS; i++) {
     motor.setPhaseVoltage(MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT, 0, elAngle);
-    _delay(700);
+    _delay(400);
+    if (i == 0) _delay(200); // extra delay for initial alignment
 
     sensor.update();
     rp[i] = float(currentRawPosition);
