@@ -3,7 +3,7 @@ const unsigned int MOTOR_VOLTAGE_LIMIT = 9;
 const unsigned int MOTOR_VOLTAGE_LIMIT_FOR_ALIGNMENT = 3;
 
 // Slew limit: the motor target can't change faster than this.
-const float MOTOR_TARGET_MAX_SLEW = 1.0;     // V per millisecond
+const float MOTOR_TARGET_MAX_SLEW = .5;     // V per millisecond
 
 BLDCMotor motor = BLDCMotor(MOTOR_POLE_PAIRS);
 
