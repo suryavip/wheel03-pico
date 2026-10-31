@@ -1,10 +1,14 @@
 const uint8_t COM_FRAME_MAX = 16;
+const unsigned long COM_MIN_REPLY_INTERVAL_US = 2000;
 
 // Receive accumulator. Kept across calls so a frame split over several reads
 // isn't lost.
 char comBuf[COM_FRAME_MAX];
 uint8_t comLen = 0;
 bool comOverflow = false;
+
+bool comReplyPending = false;
+unsigned long lastReplyMicros = 0;
 
 void replyWithPositions() {
   char out[48];
@@ -50,10 +54,14 @@ void comSetup() {
 
 void comLoop() {
   float v = 0;
-  if (!readLatestVoltage(v)) return;
+  if (readLatestVoltage(v)) {
+    setRequestVoltage(v);
+    comReplyPending = true;
+  }
 
-  // Reply once per batch: the PC sends exactly one command per reply, so
-  // answering every queued frame would put extra frames in flight.
-  replyWithPositions();
-  setRequestVoltage(v);
+  if (comReplyPending && micros() - lastReplyMicros >= COM_MIN_REPLY_INTERVAL_US) {
+    replyWithPositions();
+    lastReplyMicros = micros();
+    comReplyPending = false;
+  }
 }
